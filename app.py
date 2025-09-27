@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime
+import base64
 from PIL import Image
 import io
 
@@ -98,7 +99,7 @@ else:
             <h3>GraciousWord Global Mission ID Card</h3>
             <div style="display: flex; gap: 20px;">
                 <div>
-                    """ + (f'<img src="data:image/jpeg;base64,{Image.open(io.BytesIO(data["passport_bytes"])).tobytes().decode("base64")}" style="width: 150px; height: 180px; border: 1px solid #ccc; border-radius: 5px;" />' if data['passport_bytes'] else '<p style="color: #888;">No passport photo uploaded.</p>') + """
+                    """ + (f'<img src="data:{data["passport_type"]};base64,{base64.b64encode(Image.open(io.BytesIO(data["passport_bytes"])).tobytes()).decode("utf-8")}" style="width: 150px; height: 180px; border: 1px solid #ccc; border-radius: 5px;" />' if data['passport_bytes'] else '<p style="color: #888;">No passport photo uploaded.</p>') + """
                 </div>
                 <div>
                     <p class="info"><strong>Unique ID:</strong> {data['unique_id']}</p>
