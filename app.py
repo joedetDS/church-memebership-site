@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime
+import base64
 from fpdf import FPDF
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -77,7 +78,7 @@ else:
     id_card_html = f"""
     <div id="id-card" style="border: 2px solid black; padding: 10px; width: 300px; height: 400px; overflow: hidden;">
         <h2 style="text-align: center;">GraciousWord Global Mission ID Card</h2>
-        {('<img src="data:image/jpeg;base64,' + (Image.open(io.BytesIO(data['passport_bytes'])).tobytes().decode('utf-8') if data['passport_bytes'] else '') + '" style="width: 120px; height: 150px; float: left; margin-right: 10px;" />' if data['passport_bytes'] else '<p>No passport photo</p>')}
+        {('<img src="data:{data["passport_type"]};base64,' + (base64.b64encode(Image.open(io.BytesIO(data['passport_bytes'])).tobytes()).decode('utf-8') if data['passport_bytes'] else '') + '" style="width: 120px; height: 150px; float: left; margin-right: 10px;" />' if data['passport_bytes'] else '<p>No passport photo</p>')}
         <p><strong>Unique ID:</strong> {data['unique_id']}</p>
         <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
         <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
