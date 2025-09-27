@@ -75,7 +75,7 @@ else:
     col1, col2 = st.columns(2)
     with col1:
         if data['passport_bytes']:
-            st.image(data['passport_bytes'], width=150, caption="Passport Photo")
+            st.image(data['passport_bytes'], width=300, caption="Passport Photo")  # Increased width to match text column height
         else:
             st.write("No passport photo uploaded.")
     with col2:
@@ -89,16 +89,16 @@ else:
     
     # Generate PDF in-memory
     pdf_buffer = io.BytesIO()
-    pdf = FPDF()
+    pdf = FPDF(unit="mm", format=(100, 150))  # Custom size for ID card layout
     pdf.add_page()
     pdf.set_font("Arial", "B", 16)
-    pdf.cell(200, 10, txt="GraciousWord Global Mission ID Card", ln=1, align='C')
+    pdf.cell(100, 10, txt="GraciousWord Global Mission ID Card", ln=1, align='C')
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Unique ID: {data['unique_id']}", ln=1)
-    pdf.cell(200, 10, txt=f"Name: {data['name'] or 'Not provided'}", ln=1)
-    pdf.cell(200, 10, txt=f"Gender: {data['gender'] or 'Not provided'}", ln=1)
-    pdf.cell(200, 10, txt=f"Branch: {data['branch'] or 'Not provided'}", ln=1)
-    pdf.cell(200, 10, txt=f"Position: {data['position'] or 'Not provided'}", ln=1)
+    pdf.cell(100, 10, txt=f"Unique ID: {data['unique_id']}", ln=1)
+    pdf.cell(100, 10, txt=f"Name: {data['name'] or 'Not provided'}", ln=1)
+    pdf.cell(100, 10, txt=f"Gender: {data['gender'] or 'Not provided'}", ln=1)
+    pdf.cell(100, 10, txt=f"Branch: {data['branch'] or 'Not provided'}", ln=1)
+    pdf.cell(100, 10, txt=f"Position: {data['position'] or 'Not provided'}", ln=1)
     
     # Add image to PDF if available
     if data['passport_bytes']:
@@ -106,7 +106,10 @@ else:
         img_buffer = io.BytesIO()
         img.save(img_buffer, format="JPEG")
         img_buffer.seek(0)
-        pdf.image(img_buffer, x=10, y=10, w=50)  # Position image at top-left
+        # Adjust image size to fit the left column (50mm width, proportional height)
+        img_width = 50  # mm
+        img_height = img.height * img_width / img.width
+        pdf.image(img_buffer, x=5, y=20, w=img_width, h=img_height)  # Position and size adjusted
     
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
