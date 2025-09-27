@@ -70,23 +70,51 @@ else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
     
-    # Display ID card visually (basic layout)
-    col1, col2 = st.columns(2)
-    with col1:
-        if data['passport_bytes']:
-            st.image(data['passport_bytes'], width=300, caption="Passport Photo")  # Increased width to match text column height
-        else:
-            st.write("No passport photo uploaded.")
-    with col2:
-        st.write(f"**Unique ID:** {data['unique_id']}")
-        st.write(f"**Name:** {data['name'] or 'Not provided'}")
-        st.write(f"**Gender:** {data['gender'] or 'Not provided'}")
-        st.write(f"**Branch:** {data['branch'] or 'Not provided'}")
-        st.write(f"**Position:** {data['position'] or 'Not provided'}")
+    # Beautified ID card layout
+    st.markdown(
+        """
+        <style>
+        .id-card {
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .id-card h3 {
+            color: #4a90e2;
+            text-align: center;
+            margin-bottom: 15px;
+            font-family: Arial, sans-serif;
+        }
+        .id-card .info {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        </style>
+        <div class="id-card">
+            <h3>GraciousWord Global Mission ID Card</h3>
+            <div style="display: flex; gap: 20px;">
+                <div>
+                    """ + (f'<img src="data:image/jpeg;base64,{Image.open(io.BytesIO(data["passport_bytes"])).tobytes().decode("base64")}" style="width: 150px; height: 180px; border: 1px solid #ccc; border-radius: 5px;" />' if data['passport_bytes'] else '<p style="color: #888;">No passport photo uploaded.</p>') + """
+                </div>
+                <div>
+                    <p class="info"><strong>Unique ID:</strong> {data['unique_id']}</p>
+                    <p class="info"><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
+                    <p class="info"><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
+                    <p class="info"><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
+                    <p class="info"><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
+                </div>
+            </div>
+        </div>
+        """.format(data=data),
+        unsafe_allow_html=True
+    )
     
     # Button to reset for another form
     if st.button("Submit Another Form"):
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-        
