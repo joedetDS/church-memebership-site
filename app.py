@@ -73,7 +73,7 @@ else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
     
-    # HTML for printable ID card
+    # HTML for ID card display
     id_card_html = f"""
     <div id="id-card" style="border: 2px solid black; padding: 10px; width: 300px; height: 400px; overflow: hidden;">
         <h2 style="text-align: center;">GraciousWord Global Mission ID Card</h2>
@@ -83,17 +83,7 @@ else:
         <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
         <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
         <p><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
-        <button onclick="printIdCard()">Print ID Card</button>
     </div>
-    <script>
-        function printIdCard() {
-            var printContents = document.getElementById('id-card').innerHTML;
-            var originalContents = document.body.innerHTML;
-            document.body.innerHTML = printContents;
-            window.print();
-            document.body.innerHTML = originalContents;
-        }
-    </script>
     """
     st.components.v1.html(id_card_html, height=450)
 
