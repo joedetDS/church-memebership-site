@@ -4,61 +4,116 @@ from fpdf import FPDF
 from PIL import Image
 import io
 
-# Initialize session state for counter and submission
+# Initialize session state for counter, submission, and validation
 if 'member_count' not in st.session_state:
     st.session_state.member_count = 0
 if 'submitted' not in st.session_state:
     st.session_state.submitted = False
     st.session_state.data = {}
+if 'validations' not in st.session_state:
+    st.session_state.validations = {
+        'passport': False,
+        'name': False,
+        'dob': False,
+        'gender': True,  # Radio defaults to a value
+        'phone': False,
+        'address': False,
+        'occupation': False,
+        'branch': True,  # Selectbox defaults to a value
+        'position': True,  # Selectbox defaults to a value
+        'motivation': False
+    }
 
 # Function to generate unique ID
 def get_next_id():
     st.session_state.member_count += 1
     return f"GWGM{st.session_state.member_count:03d}"
 
+# Function to check if all fields are valid
+def all_fields_valid():
+    return all(st.session_state.validations.values())
+
 if not st.session_state.submitted:
     st.title("GraciousWord Global Mission Membership Form")
     
     with st.form(key="membership_form"):
-        # Passport upload (with size limit)
-        passport_file = st.file_uploader("Upload Passport Photo (max 300 KB)", type=["jpg", "jpeg", "png"])
+        # Passport upload (with real-time size validation)
+        passport_file = st.file_uploader("Upload Passport Photo (max 300 KB)", type=["jpg", "jpeg", "png"], key="passport")
         if passport_file:
             file_bytes = passport_file.getvalue()
             if len(file_bytes) > 300 * 1024:
-                st.error("File size exceeds 300 KB. Please upload a smaller image.")
-                st.stop()
-        
-        name = st.text_input("Name", max_chars=100)
-        dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
-        gender = st.radio("Gender", ["Male", "Female"])
-        phone = st.text_input("Phone / WhatsApp Number", max_chars=20)
-        address = st.text_area("Residential Address", max_chars=200)
-        occupation = st.text_input("Occupation", max_chars=100)
-        branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"])
-        position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"])
-        motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500)
-        
-        submit_button = st.form_submit_button("Submit")
-        
-        if submit_button:
-            if not all([passport_file, name, dob, gender, phone, address, occupation, branch, position, motivation]):
-                st.error("Please fill all required fields.")
+                st.warning("File size exceeds 300 KB. Please upload a smaller image.")
+                st.session_state.validations['passport'] = False
             else:
-                # Generate unique ID
-                unique_id = get_next_id()
-                
-                # Store data in session state
-                st.session_state.data = {
-                    'unique_id': unique_id,
-                    'name': name,
-                    'gender': gender,
-                    'branch': branch,
-                    'position': position,
-                    'passport_bytes': file_bytes,
-                    'passport_type': passport_file.type
-                }
-                st.session_state.submitted = True
-                st.rerun()  # Refresh to show ID card
+                st.session_state.validations['passport'] = True
+        else:
+            st.session_state.validations['passport'] = False
+            st.warning("Please upload a passport photo.")
+        
+        # Name
+        name = st.text_input("Name", max_chars=100, key="name")
+        st.session_state.validations['name'] = bool(name.strip())
+        if not st.session_state.validations['name']:
+            st.warning("Please enter your name.")
+        
+        # Date of Birth
+        dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today(), key="dob")
+        st.session_state.validations['dob'] = dob is not None
+        if not st.session_state.validations['dob']:
+            st.warning("Please select your date of birth.")
+        
+        # Gender (radio has a default value, so always valid)
+        gender = st.radio("Gender", ["Male", "Female"], key="gender")
+        st.session_state.validations['gender'] = True
+        
+        # Phone / WhatsApp Number
+        phone = st.text_input("Phone / WhatsApp Number", max_chars=20, key="phone")
+        st.session_state.validations['phone'] = bool(phone.strip())
+        if not st.session_state.validations['phone']:
+            st.warning("Please enter your phone number.")
+        
+        # Residential Address
+        address = st.text_area("Residential Address", max_chars=200, key="address")
+        st.session_state.validations['address'] = bool(address.strip())
+        if not st.session_state.validations['address']:
+            st.warning("Please enter your residential address.")
+        
+        # Occupation
+        occupation = st.text_input("Occupation", max_chars=100, key="occupation")
+        st.session_state.validations['occupation'] = bool(occupation.strip())
+        if not st.session_state.validations['occupation']:
+            st.warning("Please enter your occupation.")
+        
+        # Branch Affiliation (selectbox has a default value, so always valid)
+        branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"], key="branch")
+        st.session_state.validations['branch'] = True
+        
+        # Position Held (selectbox has a default value, so always valid)
+        position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"], key="position")
+        st.session_state.validations['position'] = True
+        
+        # Motivation
+        motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500, key="motivation")
+        st.session_state.validations['motivation'] = bool(motivation.strip())
+        if not st.session_state.validations['motivation']:
+            st.warning("Please enter your motivation for joining.")
+        
+        # Submit button (disabled until all fields are valid)
+        submit_button = st.form_submit_button("Submit", disabled=not all_fields_valid())
+        
+        if submit_button and all_fields_valid():
+            # Store data in session state
+            st.session_state.data = {
+                'unique_id': get_next_id(),
+                'name': name,
+                'gender': gender,
+                'branch': branch,
+                'position': position,
+                'passport_bytes': file_bytes,
+                'passport_type': passport_file.type
+            }
+            st.session_state.submitted = True
+            st.rerun()  # Refresh to show ID card
 
 else:
     data = st.session_state.data
@@ -77,7 +132,7 @@ else:
     
     st.info("You can print this page directly from your browser (Ctrl+P or right-click > Print). Or download as PDF below.")
     
-    # Generate PDF for download
+    # Generate PDF in-memory
     pdf_buffer = io.BytesIO()
     pdf = FPDF()
     pdf.add_page()
@@ -90,10 +145,12 @@ else:
     pdf.cell(200, 10, txt=f"Branch: {data['branch']}", ln=1)
     pdf.cell(200, 10, txt=f"Position: {data['position']}", ln=1)
     
-    # Add image to PDF
-    with open("temp_passport.jpg", "wb") as f:
-        f.write(data['passport_bytes'])
-    pdf.image("temp_passport.jpg", x=10, y=10, w=50)  # Position image at top-left
+    # Add image to PDF using in-memory bytes
+    img = Image.open(io.BytesIO(data['passport_bytes']))
+    img_buffer = io.BytesIO()
+    img.save(img_buffer, format="JPEG")
+    img_buffer.seek(0)
+    pdf.image(img_buffer, x=10, y=10, w=50)  # Position image at top-left
     
     pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
@@ -108,4 +165,16 @@ else:
     # Button to reset for another form
     if st.button("Submit Another Form"):
         st.session_state.submitted = False
+        st.session_state.validations = {
+            'passport': False,
+            'name': False,
+            'dob': False,
+            'gender': True,
+            'phone': False,
+            'address': False,
+            'occupation': False,
+            'branch': True,
+            'position': True,
+            'motivation': False
+        }
         st.rerun()
