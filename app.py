@@ -4,113 +4,110 @@ from fpdf import FPDF
 from PIL import Image
 import io
 
-# Initialize session state for counter, submission, data, and validation
+# Initialize session state for counter and submission
 if 'member_count' not in st.session_state:
     st.session_state.member_count = 0
 if 'submitted' not in st.session_state:
     st.session_state.submitted = False
-if 'data' not in st.session_state:
     st.session_state.data = {}
-if 'validations' not in st.session_state:
-    st.session_state.validations = {
-        'passport': False,
-        'name': False,
-        'dob': False,
-        'gender': True,
-        'phone': False,
-        'address': False,
-        'occupation': False,
-        'branch': True,
-        'position': True,
-        'motivation': False
-    }
 
 # Function to generate unique ID
 def get_next_id():
     st.session_state.member_count += 1
     return f"GWGM{st.session_state.member_count:03d}"
 
-# Function to check if all fields are valid
-def all_fields_valid():
-    return all(st.session_state.validations.values())
-
 if not st.session_state.submitted:
     st.title("GraciousWord Global Mission Membership Form")
     
     with st.form(key="membership_form"):
         # Passport upload (with real-time size validation)
-        passport_file = st.file_uploader("Upload Passport Photo (max 300 KB)", type=["jpg", "jpeg", "png"], key="passport")
+        passport_file = st.file_uploader("Upload Passport Photo (max 300 KB)", type=["jpg", "jpeg", "png"])
         if passport_file:
             file_bytes = passport_file.getvalue()
             if len(file_bytes) > 300 * 1024:
                 st.warning("File size exceeds 300 KB. Please upload a smaller image.")
-                st.session_state.validations['passport'] = False
             else:
-                st.session_state.validations['passport'] = True
+                st.session_state.validations = {'passport': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'passport': True}
         else:
-            st.session_state.validations['passport'] = False
-            if st.session_state.validations['passport'] is False and 'passport' in st.session_state:
-                st.warning("Please upload a passport photo.")
+            st.warning("Please upload a passport photo.")
+            st.session_state.validations = {'passport': False} if 'validations' not in st.session_state else {**st.session_state.validations, 'passport': False}
         
         # Name
-        st.session_state.data['name'] = st.text_input("Name", max_chars=100, key="name")
-        st.session_state.validations['name'] = bool(st.session_state.data['name'].strip())
-        if not st.session_state.validations['name']:
+        name = st.text_input("Name", max_chars=100)
+        if not name.strip():
             st.warning("Please enter your name.")
+            st.session_state.validations = {'name': False} if 'validations' not in st.session_state else {**st.session_state.validations, 'name': False}
+        else:
+            st.session_state.validations = {'name': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'name': True}
         
         # Date of Birth
-        st.session_state.data['dob'] = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today(), key="dob")
-        st.session_state.validations['dob'] = st.session_state.data['dob'] is not None
-        if not st.session_state.validations['dob']:
+        dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
+        if dob is None:
             st.warning("Please select your date of birth.")
+            st.session_state.validations = {'dob': False} if 'validations' not in st.session_state else {**st.session_state.validations, 'dob': False}
+        else:
+            st.session_state.validations = {'dob': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'dob': True}
         
         # Gender
-        st.session_state.data['gender'] = st.radio("Gender", ["Male", "Female"], key="gender")
-        st.session_state.validations['gender'] = True
+        gender = st.radio("Gender", ["Male", "Female"])
+        st.session_state.validations = {'gender': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'gender': True}
         
         # Phone / WhatsApp Number
-        st.session_state.data['phone'] = st.text_input("Phone / WhatsApp Number", max_chars=20, key="phone")
-        st.session_state.validations['phone'] = bool(st.session_state.data['phone'].strip())
-        if not st.session_state.validations['phone']:
+        phone = st.text_input("Phone / WhatsApp Number", max_chars=20)
+        if not phone.strip():
             st.warning("Please enter your phone number.")
+            st.session_state.validations = {'phone': False} if 'validations' not in st.session_state else {**st.session_state.validations, 'phone': False}
+        else:
+            st.session_state.validations = {'phone': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'phone': True}
         
         # Residential Address
-        st.session_state.data['address'] = st.text_area("Residential Address", max_chars=200, key="address")
-        st.session_state.validations['address'] = bool(st.session_state.data['address'].strip())
-        if not st.session_state.validations['address']:
+        address = st.text_area("Residential Address", max_chars=200)
+        if not address.strip():
             st.warning("Please enter your residential address.")
+            st.session_state.validations = {'address': False} if 'validations' not in st.session_state else {**st.session_state.validations, 'address': False}
+        else:
+            st.session_state.validations = {'address': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'address': True}
         
         # Occupation
-        st.session_state.data['occupation'] = st.text_input("Occupation", max_chars=100, key="occupation")
-        st.session_state.validations['occupation'] = bool(st.session_state.data['occupation'].strip())
-        if not st.session_state.validations['occupation']:
+        occupation = st.text_input("Occupation", max_chars=100)
+        if not occupation.strip():
             st.warning("Please enter your occupation.")
+            st.session_state.validations = {'occupation': False} if 'validations' not in st.session_state else {**st.session_state.validations, 'occupation': False}
+        else:
+            st.session_state.validations = {'occupation': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'occupation': True}
         
         # Branch Affiliation
-        st.session_state.data['branch'] = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"], key="branch")
-        st.session_state.validations['branch'] = True
+        branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"])
+        st.session_state.validations = {'branch': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'branch': True}
         
         # Position Held
-        st.session_state.data['position'] = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"], key="position")
-        st.session_state.validations['position'] = True
+        position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"])
+        st.session_state.validations = {'position': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'position': True}
         
         # Motivation
-        st.session_state.data['motivation'] = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500, key="motivation")
-        st.session_state.validations['motivation'] = bool(st.session_state.data['motivation'].strip())
-        if not st.session_state.validations['motivation']:
+        motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500)
+        if not motivation.strip():
             st.warning("Please enter your motivation for joining.")
+            st.session_state.validations = {'motivation': False} if 'validations' not in st.session_state else {**st.session_state.validations, 'motivation': False}
+        else:
+            st.session_state.validations = {'motivation': True} if 'validations' not in st.session_state else {**st.session_state.validations, 'motivation': True}
         
         # Submit button (disabled until all fields are valid)
-        submit_button = st.form_submit_button("Submit", disabled=not all_fields_valid())
+        submit_button = st.form_submit_button("Submit", disabled=not all(st.session_state.validations.values()) if 'validations' in st.session_state else True)
         
-        if submit_button and all_fields_valid():
-            # Store passport data and submit
-            if passport_file:
-                st.session_state.data['passport_bytes'] = passport_file.getvalue()
-                st.session_state.data['passport_type'] = passport_file.type
-                st.session_state.data['unique_id'] = get_next_id()
-                st.session_state.submitted = True
-                st.rerun()  # Refresh to show ID card
+        if submit_button and all(st.session_state.validations.values()):
+            # Store data and submit
+            st.session_state.data = {
+                'unique_id': get_next_id(),
+                'name': name,
+                'gender': gender,
+                'branch': branch,
+                'position': position,
+                'passport_bytes': passport_file.getvalue() if passport_file else None,
+                'passport_type': passport_file.type if passport_file else None
+            }
+            st.session_state.submitted = True
+            st.rerun()  # Refresh to show ID card
 
 else:
     data = st.session_state.data
@@ -163,16 +160,5 @@ else:
     if st.button("Submit Another Form"):
         st.session_state.submitted = False
         st.session_state.data = {}
-        st.session_state.validations = {
-            'passport': False,
-            'name': False,
-            'dob': False,
-            'gender': True,
-            'phone': False,
-            'address': False,
-            'occupation': False,
-            'branch': True,
-            'position': True,
-            'motivation': False
-        }
+        st.session_state.validations = {}
         st.rerun()
