@@ -74,33 +74,28 @@ else:
     st.title("Your GraciousWord Global Mission ID Card")
     
     # HTML for printable ID card
-   id_card_html = f"""
-<div id="id-card" style="border: 2px solid black; padding: 10px; width: 300px; height: 400px; overflow: hidden;">
-    <h2 style="text-align: center;">GraciousWord Global Mission ID Card</h2>
-    {f'<img src="data:{data["passport_type"]};base64,{data["passport_bytes"].decode("base64")}" style="width: 120px; height: 150px; float: left; margin-right: 10px;" />' if data['passport_bytes'] else '<p>No passport photo</p>'}
-    <p><strong>Unique ID:</strong> {data['unique_id']}</p>
-    <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
-    <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
-    <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
-    <p><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
-</div>
-<button onclick="printIdCard()">Print ID Card</button>
-<script>
-function printIdCard() {{
-    var printContents = document.getElementById('id-card').innerHTML;
-    var originalContents = document.body.innerHTML;
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-}}
-</script>
-"""
-st.components.v1.html(id_card_html, height=450)
+    id_card_html = f"""
+    <div id="id-card" style="border: 2px solid black; padding: 10px; width: 300px; height: 400px; overflow: hidden;">
+        <h2 style="text-align: center;">GraciousWord Global Mission ID Card</h2>
+        {'<img src="data:image/jpeg;base64,' + (Image.open(io.BytesIO(data['passport_bytes'])).tobytes().decode('utf-8') if data['passport_bytes'] else '') + '" style="width: 120px; height: 150px; float: left; margin-right: 10px;" />' if data['passport_bytes'] else '<p>No passport photo</p>'}
+        <p><strong>Unique ID:</strong> {data['unique_id']}</p>
+        <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
+        <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
+        <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
+        <p><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
+        <button onclick="printIdCard()">Print ID Card</button>
+    </div>
+    <script>
+        function printIdCard() {
+            var printContents = document.getElementById('id-card').innerHTML;
+            var originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+        }
+    </script>
     """
     st.components.v1.html(id_card_html, height=450)
-
-    # Print button
-    st.button("Print ID Card", on_click=printIdCard)
 
     # Generate ID card image
     img_buffer = io.BytesIO()
@@ -188,4 +183,3 @@ st.components.v1.html(id_card_html, height=450)
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-
