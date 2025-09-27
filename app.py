@@ -84,9 +84,23 @@ else:
         st.write(f"**Branch:** {data['branch'] or 'Not provided'}")
         st.write(f"**Position:** {data['position'] or 'Not provided'}")
     
-    # Button to reset for another form
-    if st.button("Submit Another Form"):
+    # Centralized button to reset for another form
+    st.markdown(
+        """
+        <style>
+        .centered-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+        </style>
+        <div class="centered-button">
+            <button style="background-color: #4a90e2; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;"
+                    onclick="window.location.href=window.location.pathname">Submit Another Form</button>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Submit Another Form", key="hidden_button"):
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-        
