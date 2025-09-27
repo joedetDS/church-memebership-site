@@ -92,15 +92,23 @@ else:
             text-align: center;
             margin-top: 20px;
         }
+        .centered-button button {
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
         </style>
         <div class="centered-button">
-            <button style="background-color: #4a90e2; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;"
-                    onclick="window.location.href=window.location.pathname">Submit Another Form</button>
+            {button}
         </div>
-        """,
+        """.format(button=st.button("Submit Another Form", key="reset_button")),
         unsafe_allow_html=True
     )
-    if st.button("Submit Another Form", key="hidden_button"):
+    if st.session_state.get("reset_button", False):
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
