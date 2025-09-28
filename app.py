@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime
+import base64
 from PIL import Image
 import io
 
@@ -149,3 +150,4 @@ else:
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
+
