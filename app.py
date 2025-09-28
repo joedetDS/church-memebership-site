@@ -149,4 +149,3 @@ else:
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-</xaiArtifact>
