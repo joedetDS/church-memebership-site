@@ -70,45 +70,83 @@ else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
     
-    # Display ID card visually (basic layout)
-    col1, col2 = st.columns(2)
-    with col1:
-        if data['passport_bytes']:
-            st.image(data['passport_bytes'], width=300, caption="Passport Photo")  # Increased width to match text column height
-        else:
-            st.write("No passport photo uploaded.")
-    with col2:
-        st.write(f"**Membership ID:** {data['unique_id']}")
-        st.write(f"**Name:** {data['name'] or 'Not provided'}")
-        st.write(f"**Gender:** {data['gender'] or 'Not provided'}")
-        st.write(f"**Branch:** {data['branch'] or 'Not provided'}")
-        st.write(f"**Position:** {data['position'] or 'Not provided'}")
-    
-    # Centralized button to reset for another form
+    # Beautified ID card layout using HTML/CSS
+    passport_base64 = ""
+    if data['passport_bytes']:
+        passport_base64 = base64.b64encode(data['passport_bytes']).decode("utf-8")
+
     st.markdown(
-        """
+        f"""
         <style>
-        .centered-button {
+        .id-card {{
+            border: 2px solid #007BFF;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #F8F9FA;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }}
+        .id-card h3 {{
+            color: #007BFF;
             text-align: center;
-            margin-top: 20px;
-        }
-        .centered-button button {
-            background-color: #4a90e2;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }}
+        .id-card .layout {{
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }}
+        .id-card img {{
+            width: 200px;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }}
+        .id-card .text {{
             font-size: 16px;
-        }
+            line-height: 1.5;
+            color: #333;
+        }}
+        .id-card .text p {{
+            margin: 5px 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }}
+        .id-card .text p:last-child {{
+            border-bottom: none;
+        }}
+        @media (max-width: 600px) {{
+            .id-card .layout {{
+                flex-direction: column;
+            }}
+        }}
         </style>
-        <div class="centered-button">
+        <div class="id-card">
+            <h3>GraciousWord Global Mission ID Card</h3>
+            <div class="layout">
+                <div>
+                    {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
+                </div>
+                <div class="text">
+                    <p><strong>Unique ID:</strong> {data['unique_id']}</p>
+                    <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
+                    <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
+                    <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
+                    <p><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
+                </div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
-    if st.button("Submit Another Form", key="reset_button"):
+    
+    # Button to reset for another form
+    if st.button("Submit Another Form"):
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-
+</xaiArtifact>
