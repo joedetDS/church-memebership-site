@@ -78,7 +78,7 @@ else:
         else:
             st.write("No passport photo uploaded.")
     with col2:
-        st.write(f"**Unique ID:** {data['unique_id']}")
+        st.write(f"**Membership ID:** {data['unique_id']}")
         st.write(f"**Name:** {data['name'] or 'Not provided'}")
         st.write(f"**Gender:** {data['gender'] or 'Not provided'}")
         st.write(f"**Branch:** {data['branch'] or 'Not provided'}")
@@ -111,3 +111,4 @@ else:
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
+
