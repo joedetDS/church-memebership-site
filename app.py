@@ -71,7 +71,7 @@ else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
     
-    # Beautified ID card layout using HTML/CSS with improved mobile responsiveness
+    # Beautified ID card layout using HTML/CSS with photo on left and text on right
     passport_base64 = ""
     if data['passport_bytes']:
         passport_base64 = base64.b64encode(data['passport_bytes']).decode("utf-8")
@@ -87,7 +87,7 @@ else:
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             margin: 0 auto;
-            width: 90%; /* Responsive width */
+            width: 90%;
         }}
         .id-card h3 {{
             color: #007BFF;
@@ -98,11 +98,13 @@ else:
         .id-card .layout {{
             display: flex;
             gap: 15px;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start; /* Align items at the top */
+        }}
+        .id-card .photo {{
+            flex: 0 0 150px; /* Fixed width for photo */
         }}
         .id-card img {{
-            width: 150px; /* Reduced for mobile */
+            width: 150px;
             height: auto;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -112,7 +114,7 @@ else:
             font-size: 16px;
             line-height: 1.5;
             color: #333;
-            flex: 1; /* Allows text to take available space */
+            flex: 1; /* Text takes remaining space */
         }}
         .id-card .text p {{
             margin: 5px 0;
@@ -125,10 +127,14 @@ else:
         @media (max-width: 600px) {{
             .id-card .layout {{
                 flex-direction: column;
+                align-items: center;
                 text-align: center;
             }}
+            .id-card .photo {{
+                flex: 0 0 120px; /* Reduced photo width on mobile */
+            }}
             .id-card img {{
-                width: 120px; /* Further reduced for small screens */
+                width: 120px;
             }}
             .id-card .text {{
                 font-size: 14px; /* Smaller font for mobile */
@@ -144,7 +150,7 @@ else:
         <div class="id-card">
             <h3>GraciousWord Global Mission ID Card</h3>
             <div class="layout">
-                <div>
+                <div class="photo">
                     {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
                 </div>
                 <div class="text">
@@ -165,3 +171,4 @@ else:
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
+        
