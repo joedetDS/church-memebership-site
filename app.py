@@ -1,6 +1,5 @@
 import streamlit as st
 import datetime
-from fpdf import FPDF
 from PIL import Image
 import io
 
@@ -85,44 +84,32 @@ else:
         st.write(f"**Branch:** {data['branch'] or 'Not provided'}")
         st.write(f"**Position:** {data['position'] or 'Not provided'}")
     
-    st.info("You can print this page directly from your browser (Ctrl+P or right-click > Print). Or download as PDF below.")
-    
-    # Generate PDF in-memory
-    pdf_buffer = io.BytesIO()
-    pdf = FPDF(unit="mm", format=(100, 150))  # Custom size for ID card layout
-    pdf.add_page()
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(100, 10, txt="GraciousWord Global Mission ID Card", ln=1, align='C')
-    pdf.set_font("Arial", size=12)
-    pdf.cell(100, 10, txt=f"Unique ID: {data['unique_id']}", ln=1)
-    pdf.cell(100, 10, txt=f"Name: {data['name'] or 'Not provided'}", ln=1)
-    pdf.cell(100, 10, txt=f"Gender: {data['gender'] or 'Not provided'}", ln=1)
-    pdf.cell(100, 10, txt=f"Branch: {data['branch'] or 'Not provided'}", ln=1)
-    pdf.cell(100, 10, txt=f"Position: {data['position'] or 'Not provided'}", ln=1)
-    
-    # Add image to PDF if available
-    if data['passport_bytes']:
-        img = Image.open(io.BytesIO(data['passport_bytes']))
-        img_buffer = io.BytesIO()
-        img.save(img_buffer, format="JPEG")
-        img_buffer.seek(0)
-        # Adjust image size to fit the left column (50mm width, proportional height)
-        img_width = 50  # mm
-        img_height = img.height * img_width / img.width
-        pdf.image(img_buffer, x=5, y=20, w=img_width, h=img_height)  # Position and size adjusted
-    
-    pdf.output(pdf_buffer)
-    pdf_buffer.seek(0)
-    
-    st.download_button(
-        label="Download ID Card as PDF",
-        data=pdf_buffer,
-        file_name=f"{data['unique_id']}_id_card.pdf",
-        mime="application/pdf"
+    # Centralized button to reset for another form
+    st.markdown(
+        """
+        <style>
+        .centered-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .centered-button button {
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        </style>
+        <div class="centered-button">
+            {button}
+        </div>
+        """.format(button=st.button("Submit Another Form", key="reset_button")),
+        unsafe_allow_html=True
     )
-    
-    # Button to reset for another form
-    if st.button("Submit Another Form"):
+    if st.session_state.get("reset_button", False):
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
+
