@@ -103,13 +103,11 @@ else:
         }
         </style>
         <div class="centered-button">
-            {button}
         </div>
-        """.format(button=st.button("Submit Another Form", key="reset_button")),
+        """,
         unsafe_allow_html=True
     )
-    if st.session_state.get("reset_button", False):
+    if st.button("Submit Another Form", key="reset_button"):
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-
