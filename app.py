@@ -71,7 +71,7 @@ else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
     
-    # Beautified ID card layout using HTML/CSS
+    # Beautified ID card layout using HTML/CSS with improved mobile responsiveness
     passport_base64 = ""
     if data['passport_bytes']:
         passport_base64 = base64.b64encode(data['passport_bytes']).decode("utf-8")
@@ -82,26 +82,27 @@ else:
         .id-card {{
             border: 2px solid #007BFF;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             background-color: #F8F9FA;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             margin: 0 auto;
+            width: 90%; /* Responsive width */
         }}
         .id-card h3 {{
             color: #007BFF;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-size: 24px;
         }}
         .id-card .layout {{
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
             justify-content: center;
         }}
         .id-card img {{
-            width: 200px;
+            width: 150px; /* Reduced for mobile */
             height: auto;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -111,6 +112,7 @@ else:
             font-size: 16px;
             line-height: 1.5;
             color: #333;
+            flex: 1; /* Allows text to take available space */
         }}
         .id-card .text p {{
             margin: 5px 0;
@@ -123,6 +125,19 @@ else:
         @media (max-width: 600px) {{
             .id-card .layout {{
                 flex-direction: column;
+                text-align: center;
+            }}
+            .id-card img {{
+                width: 120px; /* Further reduced for small screens */
+            }}
+            .id-card .text {{
+                font-size: 14px; /* Smaller font for mobile */
+            }}
+            .id-card h3 {{
+                font-size: 20px; /* Adjusted header size */
+            }}
+            .id-card {{
+                padding: 10px; /* Reduced padding */
             }}
         }}
         </style>
@@ -150,4 +165,3 @@ else:
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-
