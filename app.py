@@ -57,8 +57,21 @@ if not st.session_state.submitted:
         submit_button = st.form_submit_button("Submit")
         
         if submit_button:
+            # Validation for all fields
             if passport_file is None:
                 st.error("Please upload a passport photo.")
+            elif not name.strip():
+                st.error("Please enter your name.")
+            elif not phone.strip():
+                st.error("Please enter your phone/WhatsApp number.")
+            elif not address.strip():
+                st.error("Please enter your residential address.")
+            elif not occupation.strip():
+                st.error("Please enter your occupation.")
+            elif branch == "":  # Default empty value for selectbox
+                st.error("Please select a branch affiliation.")
+            elif position == "":  # Default empty value for selectbox
+                st.error("Please select a position held.")
             else:
                 # Store data and submit
                 st.session_state.data = {
@@ -160,7 +173,7 @@ else:
                     {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
                 </div>
                 <div class="text">
-                    <p><strong>Membership ID:</strong> {data['unique_id']}</p>
+                    <p><strong>Unique ID:</strong> {data['unique_id']}</p>
                     <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
                     <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
                     <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
