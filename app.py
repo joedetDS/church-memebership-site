@@ -95,7 +95,7 @@ else:
         color: #007BFF;
         text-align: right;
         margin: 0 0 12px 0;
-        font-size: clamp(16px, 3.5vw, 24px);
+        font-size: clamp(20px, 3.5vw, 24px);
         text-transform: uppercase;
         font-weight: 600;
         display: block;
@@ -186,6 +186,7 @@ else:
     """,
     unsafe_allow_html=True
 )
+
 
 
 
