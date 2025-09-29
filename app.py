@@ -1,223 +1,261 @@
+# app.py
 import streamlit as st
 import datetime
 import base64
-from PIL import Image
-import io
 import os
+import io
+from PIL import Image
+import streamlit.components.v1 as components
 
-# Initialize session state for counter and submission
+# -----------------------
+# Configuration
+# -----------------------
+PASSPORT_MAX_BYTES = 300 * 1024  # 300 KB
+LOGO_FILENAME = "logo.png"  # must exist in the same folder as app.py
+
+# -----------------------
+# Session state init
+# -----------------------
 if 'member_count' not in st.session_state:
     st.session_state.member_count = 0
 if 'submitted' not in st.session_state:
     st.session_state.submitted = False
     st.session_state.data = {}
 
-# Function to generate unique ID
+# -----------------------
+# Helpers
+# -----------------------
 def get_next_id():
+    """Generate next unique ID for members."""
     st.session_state.member_count += 1
     return f"GWGM{st.session_state.member_count:03d}"
 
+def read_logo_base64(filename=LOGO_FILENAME):
+    """Read logo file in current directory and return (mime, base64) or (None, None)."""
+    try:
+        if os.path.exists(filename):
+            with open(filename, "rb") as f:
+                b = f.read()
+            if b:
+                return "image/png", base64.b64encode(b).decode("utf-8")
+    except Exception:
+        pass
+    return None, None
+
+def validate_image_bytes(file_bytes):
+    """Optionally validate image bytes (PIL) and return True if valid image."""
+    try:
+        Image.open(io.BytesIO(file_bytes)).verify()
+        return True
+    except Exception:
+        return False
+
+# -----------------------
+# Form view
+# -----------------------
 if not st.session_state.submitted:
     st.title("GraciousWord Global Mission Membership Form")
-    
+
     with st.form(key="membership_form"):
         col1, col2 = st.columns(2)
         with col1:
-            # Passport upload (mandatory, single file, max 300KB)
             passport_file = st.file_uploader(
-                "Upload Passport Photo (Drag and drop file here, Limit 300KB per file • JPG, JPEG, PNG)",
+                "Upload Passport Photo (Drag and drop • Limit 300KB • JPG/JPEG/PNG)",
                 type=["jpg", "jpeg", "png"],
                 accept_multiple_files=False
             )
-            
-            # Name
             name = st.text_input("Name", max_chars=100)
-            
-            # Date of Birth
             dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
-            
-            # Gender
             gender = st.radio("Gender", ["Male", "Female"])
-            
-            # Phone / WhatsApp Number
             phone = st.text_input("Phone / WhatsApp Number", max_chars=20)
-        
+
         with col2:
-            # Residential Address
             address = st.text_area("Residential Address", max_chars=200)
-            
-            # Occupation
             occupation = st.text_input("Occupation", max_chars=100)
-            
-            # Branch Affiliation
             branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"])
-            
-            # Position Held
             position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"])
-            
-            # Motivation
             motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500)
-        
-        # Submit button (always enabled)
+
         submit_button = st.form_submit_button("Submit")
-        
+
         if submit_button:
-            # Validation for all fields
+            # Basic validations
+            error = None
             if passport_file is None:
-                st.error("Please upload a passport photo.")
-            elif passport_file.size > 300 * 1024:  # Check file size (300KB in bytes)
-                st.error("Passport photo size must not exceed 300KB.")
+                error = "Please upload a passport photo."
+            elif passport_file.size > PASSPORT_MAX_BYTES:
+                error = "Passport photo size must not exceed 300KB."
             elif not name.strip():
-                st.error("Please enter your name.")
+                error = "Please enter your name."
             elif not phone.strip():
-                st.error("Please enter your phone/WhatsApp number.")
+                error = "Please enter your phone/WhatsApp number."
             elif not address.strip():
-                st.error("Please enter your residential address.")
+                error = "Please enter your residential address."
             elif not occupation.strip():
-                st.error("Please enter your occupation.")
-            elif branch == "":  # Default empty value for selectbox
-                st.error("Please select a branch affiliation.")
-            elif position == "":  # Default empty value for selectbox
-                st.error("Please select a position held.")
+                error = "Please enter your occupation."
+            # optional more validation: image sanity check
+            if error is None:
+                try:
+                    pb = passport_file.getvalue()
+                    if not validate_image_bytes(pb):
+                        error = "Uploaded passport is not a valid image file."
+                except Exception:
+                    error = "Failed to read uploaded passport file."
+
+            if error:
+                st.error(error)
             else:
-                # Store data and submit
+                # Save the minimal data required for ID
                 st.session_state.data = {
                     'unique_id': get_next_id(),
-                    'name': name,
+                    'name': name.strip(),
                     'gender': gender,
                     'branch': branch,
                     'position': position,
-                    'passport_bytes': passport_file.getvalue(),
+                    'passport_bytes': pb,
                     'passport_type': passport_file.type
                 }
                 st.session_state.submitted = True
-                st.rerun()  # Refresh to show ID card
+                st.experimental_rerun()
 
+# -----------------------
+# ID Card view
+# -----------------------
 else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
-    
+
     # Prepare passport image base64
     passport_base64 = ""
     if data.get('passport_bytes'):
         passport_base64 = base64.b64encode(data['passport_bytes']).decode("utf-8")
 
-    # Load the church logo as 'logo.png' from current working directory (no path)
-    logo_filename = "logo.png"
-    logo_base64 = ""
-    logo_mime = "image/png"
-    try:
-        if os.path.exists(logo_filename):
-            with open(logo_filename, "rb") as f:
-                logo_bytes = f.read()
-            if logo_bytes:
-                logo_base64 = base64.b64encode(logo_bytes).decode("utf-8")
-    except Exception:
+    # Load logo from current working directory as 'logo.png'
+    logo_mime, logo_base64 = read_logo_base64(LOGO_FILENAME)
+    if not logo_base64:
+        # If not available, logo_mime and logo_base64 are None; we simply won't show logo.
+        logo_mime = "image/png"
         logo_base64 = ""
 
-    st.markdown(
-        f"""
-        <style>
-        .id-card {{
-            border: 2px solid #007BFF;
-            border-radius: 10px;
-            padding: 15px;
-            background-color: #F8F9FA;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
-            width: 90%;
-        }}
-        .id-card .header {{
-            display:flex;
-            align-items:center;
-            gap:12px;
-            margin-bottom:10px;
-        }}
-        .id-card .header img.logo {{
-            width:80px;
-            height:auto;
-            border-radius:8px;
-            object-fit:contain;
-            border: 1px solid rgba(0,0,0,0.05);
-            background: white;
-            padding: 4px;
-        }}
-        .id-card h3 {{
-            color: #007BFF;
-            margin: 0;
-            font-size: 22px;
-        }}
+    # Build the HTML to render
+    html_content = f"""
+    <style>
+    .id-card {{
+        border: 2px solid #007BFF;
+        border-radius: 10px;
+        padding: 15px;
+        background-color: #F8F9FA;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 640px;
+        margin: 0 auto;
+        width: 92%;
+    }}
+    .id-card .header {{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        margin-bottom:10px;
+    }}
+    .id-card .header img.logo {{
+        width:80px;
+        height:auto;
+        border-radius:8px;
+        object-fit:contain;
+        border: 1px solid rgba(0,0,0,0.05);
+        background: white;
+        padding: 4px;
+    }}
+    .id-card h3 {{
+        color: #007BFF;
+        margin: 0;
+        font-size: 22px;
+    }}
+    .id-card .layout {{
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+    }}
+    .id-card .photo {{
+        flex: 0 0 150px;
+    }}
+    .id-card img.passport {{
+        width: 150px;
+        height: auto;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }}
+    .id-card .text {{
+        font-size: 16px;
+        line-height: 1.5;
+        color: #333;
+        flex: 1;
+    }}
+    .id-card .text p {{
+        margin: 5px 0;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }}
+    .id-card .text p:last-child {{
+        border-bottom: none;
+    }}
+    @media (max-width: 600px) {{
         .id-card .layout {{
-            display: flex;
-            gap: 15px;
-            align-items: flex-start; /* Align items at the top */
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }}
         .id-card .photo {{
-            flex: 0 0 150px; /* Fixed width for photo */
+            flex: 0 0 120px;
         }}
         .id-card img.passport {{
-            width: 150px;
-            height: auto;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 120px;
         }}
         .id-card .text {{
-            font-size: 16px;
-            line-height: 1.5;
-            color: #333;
-            flex: 1; /* Text takes remaining space */
+            font-size: 14px;
         }}
-        .id-card .text p {{
-            margin: 5px 0;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
+        .id-card h3 {{
+            font-size: 20px;
         }}
-        .id-card .text p:last-child {{
-            border-bottom: none;
+        .id-card {{
+            padding: 10px;
         }}
-        @media (max-width: 600px) {{
-            .id-card .layout {{
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }}
-            .id-card .photo {{
-                flex: 0 0 120px; /* Reduced photo width on mobile */
-            }}
-            .id-card img.passport {{
-                width: 120px;
-            }}
-            .id-card .text {{
-                font-size: 14px; /* Smaller font for mobile */
-            }}
-            .id-card h3 {{
-                font-size: 20px; /* Adjusted header size */
-            }}
-            .id-card {{
-                padding: 10px; /* Reduced padding */
-            }}
-        }}
-        </style>
-        <div class="id-card">
-            <div class="header">
-                {f'<img class="logo" src="data:{logo_mime};base64,{logo_base64}" alt="Church Logo">' if logo_base64 else ''}
-                <h3>GraciousWord Global Mission ID Card</h3>
+    }}
+    </style>
+
+    <div class="id-card">
+        <div class="header">
+            {f'<img class="logo" src="data:{logo_mime};base64,{logo_base64}" alt="Church Logo">' if logo_base64 else ''}
+            <h3>GraciousWord Global Mission ID Card</h3>
+        </div>
+
+        <div class="layout">
+            <div class="photo">
+                {'<img class="passport" src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data.get('passport_bytes') else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
             </div>
-            <div class="layout">
-                <div class="photo">
-                    {'<img class="passport" src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
-                </div>
-                <div class="text">
-                    <p><strong>Unique ID:</strong> {data['unique_id']}</p>
-                    <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
-                    <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
-                    <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
-                    <p><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
-                </div>
+
+            <div class="text">
+                <p><strong>Unique ID:</strong> {data.get('unique_id', 'N/A')}</p>
+                <p><strong>Name:</strong> {data.get('name', 'Not provided')}</p>
+                <p><strong>Gender:</strong> {data.get('gender', 'Not provided')}</p>
+                <p><strong>Branch:</strong> {data.get('branch', 'Not provided')}</p>
+                <p><strong>Position:</strong> {data.get('position', 'Not provided')}</p>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """
+
+    # Render using components.html so the raw HTML/CSS is interpreted
+    # Adjust height if the card gets clipped in your environment
+    components.html(html_content, height=520, scrolling=True)
+
+    st.markdown("")
+    col1, col2 = st.columns([1,1])
+    with col1:
+        if st.button("Create another ID"):
+            st.session_state.submitted = False
+            st.experimental_rerun()
+    with col2:
+        if st.button("Reset member counter"):
+            st.session_state.member_count = 0
+            st.success("Member counter reset to 0.")
