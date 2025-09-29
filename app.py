@@ -85,72 +85,79 @@ else:
             background-color: #F8F9FA;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 600px;
+            width: 95%;
             margin: 0 auto;
-            width: 90%;
-            overflow: hidden;
+            box-sizing: border-box;
+            overflow: hidden; /* prevent horizontal scroll */
         }}
         .id-card h3 {{
             color: #007BFF;
             text-align: center;
-            margin-bottom: 15px;
-            font-size: 24px;
+            margin-bottom: 12px;
+            font-size: clamp(16px, 3.5vw, 24px);
         }}
-        /* KEEP HORIZONTAL LAYOUT even on small screens.
-           Allow horizontal scrolling if the content is wider than the viewport. */
+
+        /* Horizontal layout that SCALES (no horizontal scroll) */
         .id-card .layout {{
             display: flex;
-            gap: 15px;
-            align-items: center; /* vertically center items */
-            flex-direction: row; /* force row layout */
-            flex-wrap: nowrap; /* prevent wrapping to column */
-            overflow-x: auto; /* allow horizontal scroll on very narrow screens */
-            -webkit-overflow-scrolling: touch;
+            gap: 12px;
+            align-items: center;          /* vertically center items */
+            flex-direction: row;          /* keep photo left, text right */
+            flex-wrap: nowrap;            /* do NOT wrap to column */
         }}
+
+        /* Photo column uses a responsive, clamped width */
         .id-card .photo {{
-            flex: 0 0 150px; /* fixed width for photo on desktop */
+            flex: 0 0 clamp(80px, 20vw, 140px); /* min 80px, ideal 20vw, max 140px */
+            box-sizing: border-box;
         }}
         .id-card img {{
-            width: 150px;
-            height: 150px;
-            object-fit: cover; /* crop/fit image neatly */
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;      /* keep square */
+            object-fit: cover;        /* crop nicely if needed */
             border: 1px solid #ccc;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: block;
         }}
+
+        /* Text column takes remaining space and is allowed to shrink */
         .id-card .text {{
-            font-size: 16px;
-            line-height: 1.5;
+            flex: 1 1 auto; /* grow and shrink as needed */
+            min-width: 0;   /* IMPORTANT — allows flex items to shrink inside container */
+            font-size: clamp(12px, 2.2vw, 16px); /* scales with viewport */
+            line-height: 1.3;
             color: #333;
-            flex: 1; /* Text takes remaining space */
-            min-width: 220px; /* ensure it stays to the RIGHT of the photo */
         }}
         .id-card .text p {{
-            margin: 5px 0;
+            margin: 4px 0;
+            padding-bottom: 4px;
             border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
+            word-wrap: break-word; /* wrap long text without causing overflow */
+            overflow-wrap: break-word;
         }}
         .id-card .text p:last-child {{
             border-bottom: none;
         }}
 
-        /* Responsive adjustments: keep row but reduce sizes on small screens */
-        @media (max-width: 420px) {{
+        /* Tighter adjustments for very small screens */
+        @media (max-width: 360px) {{
             .id-card {{
                 padding: 10px;
             }}
             .id-card h3 {{
-                font-size: 18px;
+                font-size: 16px;
             }}
             .id-card .photo {{
-                flex: 0 0 110px; /* smaller photo on tiny screens */
-            }}
-            .id-card img {{
-                width: 110px;
-                height: 110px;
+                flex: 0 0 72px; /* slightly smaller fixed width for tiniest screens */
             }}
             .id-card .text {{
-                font-size: 14px;
-                min-width: 180px;
+                font-size: 12px;
+            }}
+            .id-card .text p {{
+                margin: 3px 0;
+                padding-bottom: 3px;
             }}
         }}
         </style>
@@ -158,7 +165,7 @@ else:
             <h3>GraciousWord Global Mission ID Card</h3>
             <div class="layout">
                 <div class="photo">
-                    {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
+                    {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888; margin:0;">No passport photo uploaded</p>'}
                 </div>
                 <div class="text">
                     <p><strong>Unique ID:</strong> {data['unique_id']}</p>
@@ -168,7 +175,7 @@ else:
                     <p><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
                 </div>
             </div>
-        </div>  
+        </div>
         """,
         unsafe_allow_html=True
     )
