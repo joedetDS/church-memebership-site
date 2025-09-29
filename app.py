@@ -3,6 +3,7 @@ import datetime
 import base64
 from PIL import Image
 import io
+import os
 
 # Initialize session state for counter and submission
 if 'member_count' not in st.session_state:
@@ -23,7 +24,11 @@ if not st.session_state.submitted:
         col1, col2 = st.columns(2)
         with col1:
             # Passport upload (mandatory, single file, max 300KB)
-            passport_file = st.file_uploader("Upload Passport Photo (Drag and drop file here, Limit 300KB per file • JPG, JPEG, PNG)", type=["jpg", "jpeg", "png"], accept_multiple_files=False)
+            passport_file = st.file_uploader(
+                "Upload Passport Photo (Drag and drop file here, Limit 300KB per file • JPG, JPEG, PNG)",
+                type=["jpg", "jpeg", "png"],
+                accept_multiple_files=False
+            )
             
             # Name
             name = st.text_input("Name", max_chars=100)
@@ -92,10 +97,23 @@ else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
     
-    # Beautified ID card layout using HTML/CSS with photo on left and text on right
+    # Prepare passport image base64
     passport_base64 = ""
-    if data['passport_bytes']:
+    if data.get('passport_bytes'):
         passport_base64 = base64.b64encode(data['passport_bytes']).decode("utf-8")
+
+    # Load the church logo as 'logo.png' from current working directory (no path)
+    logo_filename = "logo.png"
+    logo_base64 = ""
+    logo_mime = "image/png"
+    try:
+        if os.path.exists(logo_filename):
+            with open(logo_filename, "rb") as f:
+                logo_bytes = f.read()
+            if logo_bytes:
+                logo_base64 = base64.b64encode(logo_bytes).decode("utf-8")
+    except Exception:
+        logo_base64 = ""
 
     st.markdown(
         f"""
@@ -110,11 +128,25 @@ else:
             margin: 0 auto;
             width: 90%;
         }}
+        .id-card .header {{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:10px;
+        }}
+        .id-card .header img.logo {{
+            width:80px;
+            height:auto;
+            border-radius:8px;
+            object-fit:contain;
+            border: 1px solid rgba(0,0,0,0.05);
+            background: white;
+            padding: 4px;
+        }}
         .id-card h3 {{
             color: #007BFF;
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 24px;
+            margin: 0;
+            font-size: 22px;
         }}
         .id-card .layout {{
             display: flex;
@@ -124,7 +156,7 @@ else:
         .id-card .photo {{
             flex: 0 0 150px; /* Fixed width for photo */
         }}
-        .id-card img {{
+        .id-card img.passport {{
             width: 150px;
             height: auto;
             border: 1px solid #ccc;
@@ -154,7 +186,7 @@ else:
             .id-card .photo {{
                 flex: 0 0 120px; /* Reduced photo width on mobile */
             }}
-            .id-card img {{
+            .id-card img.passport {{
                 width: 120px;
             }}
             .id-card .text {{
@@ -169,10 +201,13 @@ else:
         }}
         </style>
         <div class="id-card">
-            <h3>GraciousWord Global Mission ID Card</h3>
+            <div class="header">
+                {f'<img class="logo" src="data:{logo_mime};base64,{logo_base64}" alt="Church Logo">' if logo_base64 else ''}
+                <h3>GraciousWord Global Mission ID Card</h3>
+            </div>
             <div class="layout">
                 <div class="photo">
-                    {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
+                    {'<img class="passport" src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
                 </div>
                 <div class="text">
                     <p><strong>Unique ID:</strong> {data['unique_id']}</p>
@@ -186,4 +221,3 @@ else:
         """,
         unsafe_allow_html=True
     )
-
