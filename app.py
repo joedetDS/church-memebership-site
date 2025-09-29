@@ -22,7 +22,11 @@ if not st.session_state.submitted:
     with st.form(key="membership_form"):
         col1, col2 = st.columns(2)
         with col1:
-            passport_file = st.file_uploader("Upload Passport Photo (Drag and drop file here, Limit 300KB per file • JPG, JPEG, PNG)", type=["jpg", "jpeg", "png"], accept_multiple_files=False)
+            passport_file = st.file_uploader(
+                "Upload Passport Photo (Limit 300KB • JPG, JPEG, PNG)", 
+                type=["jpg", "jpeg", "png"], 
+                accept_multiple_files=False
+            )
             name = st.text_input("Name", max_chars=100)
             dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
             gender = st.radio("Gender", ["Male", "Female"])
@@ -34,6 +38,11 @@ if not st.session_state.submitted:
             branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"])
             position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"])
             motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500)
+            # Optional logo uploader (this is where the logo is provided)
+            logo_file = st.file_uploader(
+                "Optional: Upload Organization Logo (PNG with transparency recommended)",
+                type=["png", "jpg", "jpeg"], accept_multiple_files=False, key="logo_uploader"
+            )
         
         submit_button = st.form_submit_button("Submit")
         
@@ -55,6 +64,7 @@ if not st.session_state.submitted:
             elif position == "":
                 st.error("Please select a position held.")
             else:
+                # store data including logo if provided
                 st.session_state.data = {
                     'unique_id': get_next_id(),
                     'name': name,
@@ -62,133 +72,159 @@ if not st.session_state.submitted:
                     'branch': branch,
                     'position': position,
                     'passport_bytes': passport_file.getvalue(),
-                    'passport_type': passport_file.type
+                    'passport_type': passport_file.type,
+                    'logo_bytes': logo_file.getvalue() if logo_file else None,
+                    'logo_type': logo_file.type if logo_file else None
                 }
                 st.session_state.submitted = True
                 st.rerun()
 
 else:
     data = st.session_state.data
-    st.title("Your GraciousWord Global Mission ID Card")
+    st.title("Your GraciousWord Global Mission Membership Card")
     
     passport_base64 = ""
-    if data['passport_bytes']:
+    if data.get('passport_bytes'):
         passport_base64 = base64.b64encode(data['passport_bytes']).decode("utf-8")
+    logo_base64 = ""
+    if data.get('logo_bytes'):
+        logo_base64 = base64.b64encode(data['logo_bytes']).decode("utf-8")
 
+    # Card with deep/dark background, centered logo and "MEMBERSHIP CARD" subtitle
     st.markdown(
     f"""
     <style>
-    .id-card {{
-        border: 2px solid #007BFF;
-        border-radius: 10px;
-        padding: 15px;
-        background-color: #F8F9FA;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
-        width: 95%;
-        margin: 0 auto;
-        box-sizing: border-box;
-        overflow: hidden; /* prevent horizontal scroll */
+    :root {{
+        --card-bg-start: #071228;
+        --card-bg-end: #0a2b45;
+        --accent: #FF6B6B; /* unused but available */
+        --text-light: #FFFFFF;
+        --muted: rgba(255,255,255,0.85);
     }}
-    /* Centered title (explicit) */
-    .id-card h3 {{
-        color: #007BFF;
-        text-align: center;
-        margin: 0 0 12px 0;
-        font-size: clamp(25px, 3.5vw, 24px);
-        text-transform: uppercase;
-        font-weight: 650;
+    body {{ background-color: transparent; }}
+    .id-card {{
+        border-radius: 12px;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--card-bg-start), var(--card-bg-end));
+        box-shadow: 0 6px 18px rgba(2,6,23,0.55);
+        max-width: 680px;
+        width: 96%;
+        margin: 12px auto;
+        box-sizing: border-box;
+        color: var(--text-light);
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.06);
+    }}
+    /* Header: logo centered (if provided) or fallback title text */
+    .id-card .header {{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        margin-bottom: 10px;
+    }}
+    .id-card .logo {{
+        max-width: clamp(90px, 22vw, 160px);
+        width: auto;
+        height: auto;
         display: block;
     }}
+    .id-card .fallback-title {{
+        color: var(--text-light);
+        font-size: clamp(16px, 3.2vw, 20px);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }}
+    .id-card .subtitle {{
+        color: rgba(255,255,255,0.95);
+        font-size: clamp(12px, 2.6vw, 14px);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+    }}
 
-    /* Horizontal layout: photo left, text right.
-       align-items: stretch makes the photo match the text column's height. */
+    /* Horizontal layout: passport left, bio right */
     .id-card .layout {{
         display: flex;
-        gap: 8px;                 /* smaller gap reduces left whitespace */
-        align-items: stretch;     /* make photo span the bio height */
+        gap: 12px;
+        align-items: stretch;
         flex-direction: row;
         flex-wrap: nowrap;
     }}
-
-    /* Photo column uses a responsive, clamped width (narrower than before) */
     .id-card .photo {{
-        flex: 0 0 clamp(72px, 16vw, 110px); /* narrower width but full height */
+        flex: 0 0 clamp(70px, 18vw, 120px);
         box-sizing: border-box;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.07);
+        background: rgba(255,255,255,0.03);
     }}
-    /* Make the image fill the photo column height and crop as needed */
-    .id-card img {{
+    .id-card .photo img {{
         width: 100%;
         height: 100%;
-        object-fit: cover;       /* cover ensures it spans height while keeping aspect */
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         display: block;
+        object-fit: cover;
     }}
-
-    /* Text column: bigger font, allowed to shrink to avoid overflow */
     .id-card .text {{
         flex: 1 1 auto;
-        min-width: 0;  /* allow text to shrink within the flex container */
-        font-size: clamp(13px, 3vw, 18px); /* INCREASED bio font size */
+        min-width: 0;
+        font-size: clamp(13px, 3vw, 18px);
         line-height: 1.35;
-        color: #333;
-        padding-left: 4px; /* tiny padding so text isn't jammed to the image */
+        color: var(--muted);
+        padding-left: 6px;
     }}
     .id-card .text p {{
         margin: 6px 0;
-        padding-bottom: 4px;
-        border-bottom: 1px solid #eee;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        color: var(--text-light);
     }}
-    .id-card .text p:last-child {{
-        border-bottom: none;
+    .id-card .text p small {{
+        display: block;
+        color: rgba(255,255,255,0.80);
+        font-weight: 500;
     }}
 
-    /* Very small screens: keep everything legible */
-    @media (max-width: 360px) {{
+    @media (max-width: 420px) {{
         .id-card {{
             padding: 10px;
         }}
-        .id-card h3 {{
-            font-size: 16px;
+        .id-card .layout {{
+            gap: 8px;
         }}
         .id-card .photo {{
-            flex: 0 0 64px; /* smallest width on tiny screens */
+            flex: 0 0 64px;
         }}
         .id-card .text {{
-            font-size: 12.5px;
-        }}
-        .id-card .text p {{
-            margin: 4px 0;
-            padding-bottom: 3px;
+            font-size: 13px;
         }}
     }}
     </style>
 
     <div class="id-card">
-        <h3>GraciousWord Global Mission ID Card</h3>
+        <div class="header">
+            <!-- show logo if uploaded, else fallback title text -->
+            {f'<img class="logo" src="data:{data.get("logo_type")};base64,{logo_base64}" alt="Logo">' if logo_base64 else '<div class="fallback-title">GraciousWord Global Mission</div>'}
+            <div class="subtitle">MEMBERSHIP CARD</div>
+        </div>
+
         <div class="layout">
             <div class="photo">
-                {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888; margin:0;">No passport photo uploaded</p>'}
+                {'<img src="data:' + data["passport_type"] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if passport_base64 else '<div style="padding:12px; text-align:center; color:rgba(255,255,255,0.6);">No photo</div>'}
             </div>
             <div class="text">
-                <p><strong>Unique ID:</strong> {data['unique_id']}</p>
-                <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
-                <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
-                <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
-                <p><strong>Position:</strong> {data['position'] or 'Not provided'}</p>
+                <p><strong>Unique ID:</strong> <small>{data['unique_id']}</small></p>
+                <p><strong>Name:</strong> <small>{data['name'] or 'Not provided'}</small></p>
+                <p><strong>Gender:</strong> <small>{data['gender'] or 'Not provided'}</small></p>
+                <p><strong>Branch:</strong> <small>{data['branch'] or 'Not provided'}</small></p>
+                <p><strong>Position:</strong> <small>{data['position'] or 'Not provided'}</small></p>
             </div>
         </div>
     </div>
     """,
     unsafe_allow_html=True
-)
-
-
-
-
-
-
+    )
