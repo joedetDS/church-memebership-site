@@ -22,45 +22,25 @@ if not st.session_state.submitted:
     with st.form(key="membership_form"):
         col1, col2 = st.columns(2)
         with col1:
-            # Passport upload (mandatory, single file, max 300KB)
             passport_file = st.file_uploader("Upload Passport Photo (Drag and drop file here, Limit 300KB per file • JPG, JPEG, PNG)", type=["jpg", "jpeg", "png"], accept_multiple_files=False)
-            
-            # Name
             name = st.text_input("Name", max_chars=100)
-            
-            # Date of Birth
             dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
-            
-            # Gender
             gender = st.radio("Gender", ["Male", "Female"])
-            
-            # Phone / WhatsApp Number
             phone = st.text_input("Phone / WhatsApp Number", max_chars=20)
         
         with col2:
-            # Residential Address
             address = st.text_area("Residential Address", max_chars=200)
-            
-            # Occupation
             occupation = st.text_input("Occupation", max_chars=100)
-            
-            # Branch Affiliation
             branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"])
-            
-            # Position Held
             position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"])
-            
-            # Motivation
             motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500)
         
-        # Submit button (always enabled)
         submit_button = st.form_submit_button("Submit")
         
         if submit_button:
-            # Validation for all fields
             if passport_file is None:
                 st.error("Please upload a passport photo.")
-            elif passport_file.size > 300 * 1024:  # Check file size (300KB in bytes)
+            elif passport_file.size > 300 * 1024:
                 st.error("Passport photo size must not exceed 300KB.")
             elif not name.strip():
                 st.error("Please enter your name.")
@@ -70,12 +50,11 @@ if not st.session_state.submitted:
                 st.error("Please enter your residential address.")
             elif not occupation.strip():
                 st.error("Please enter your occupation.")
-            elif branch == "":  # Default empty value for selectbox
+            elif branch == "":
                 st.error("Please select a branch affiliation.")
-            elif position == "":  # Default empty value for selectbox
+            elif position == "":
                 st.error("Please select a position held.")
             else:
-                # Store data and submit
                 st.session_state.data = {
                     'unique_id': get_next_id(),
                     'name': name,
@@ -86,13 +65,12 @@ if not st.session_state.submitted:
                     'passport_type': passport_file.type
                 }
                 st.session_state.submitted = True
-                st.rerun()  # Refresh to show ID card
+                st.rerun()
 
 else:
     data = st.session_state.data
     st.title("Your GraciousWord Global Mission ID Card")
     
-    # Beautified ID card layout using HTML/CSS with photo on left and text on right
     passport_base64 = ""
     if data['passport_bytes']:
         passport_base64 = base64.b64encode(data['passport_bytes']).decode("utf-8")
@@ -109,6 +87,7 @@ else:
             max-width: 600px;
             margin: 0 auto;
             width: 90%;
+            overflow: hidden;
         }}
         .id-card h3 {{
             color: #007BFF;
@@ -116,17 +95,24 @@ else:
             margin-bottom: 15px;
             font-size: 24px;
         }}
+        /* KEEP HORIZONTAL LAYOUT even on small screens.
+           Allow horizontal scrolling if the content is wider than the viewport. */
         .id-card .layout {{
             display: flex;
             gap: 15px;
-            align-items: flex-start; /* Align items at the top */
+            align-items: center; /* vertically center items */
+            flex-direction: row; /* force row layout */
+            flex-wrap: nowrap; /* prevent wrapping to column */
+            overflow-x: auto; /* allow horizontal scroll on very narrow screens */
+            -webkit-overflow-scrolling: touch;
         }}
         .id-card .photo {{
-            flex: 0 0 150px; /* Fixed width for photo */
+            flex: 0 0 150px; /* fixed width for photo on desktop */
         }}
         .id-card img {{
             width: 150px;
-            height: auto;
+            height: 150px;
+            object-fit: cover; /* crop/fit image neatly */
             border: 1px solid #ccc;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -136,6 +122,7 @@ else:
             line-height: 1.5;
             color: #333;
             flex: 1; /* Text takes remaining space */
+            min-width: 220px; /* ensure it stays to the RIGHT of the photo */
         }}
         .id-card .text p {{
             margin: 5px 0;
@@ -145,26 +132,25 @@ else:
         .id-card .text p:last-child {{
             border-bottom: none;
         }}
-        @media (max-width: 600px) {{
-            .id-card .layout {{
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }}
-            .id-card .photo {{
-                flex: 0 0 120px; /* Reduced photo width on mobile */
-            }}
-            .id-card img {{
-                width: 120px;
-            }}
-            .id-card .text {{
-                font-size: 14px; /* Smaller font for mobile */
+
+        /* Responsive adjustments: keep row but reduce sizes on small screens */
+        @media (max-width: 420px) {{
+            .id-card {{
+                padding: 10px;
             }}
             .id-card h3 {{
-                font-size: 20px; /* Adjusted header size */
+                font-size: 18px;
             }}
-            .id-card {{
-                padding: 10px; /* Reduced padding */
+            .id-card .photo {{
+                flex: 0 0 110px; /* smaller photo on tiny screens */
+            }}
+            .id-card img {{
+                width: 110px;
+                height: 110px;
+            }}
+            .id-card .text {{
+                font-size: 14px;
+                min-width: 180px;
             }}
         }}
         </style>
