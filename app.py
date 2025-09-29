@@ -22,8 +22,8 @@ if not st.session_state.submitted:
     with st.form(key="membership_form"):
         col1, col2 = st.columns(2)
         with col1:
-            # Passport upload (mandatory)
-            passport_file = st.file_uploader("Upload Passport Photo", type=["jpg", "jpeg", "png"])
+            # Passport upload (mandatory, single file, max 300KB)
+            passport_file = st.file_uploader("Upload Passport Photo (Drag and drop file here, Limit 300KB per file • JPG, JPEG, PNG)", type=["jpg", "jpeg", "png"], accept_multiple_files=False)
             
             # Name
             name = st.text_input("Name", max_chars=100)
@@ -60,6 +60,8 @@ if not st.session_state.submitted:
             # Validation for all fields
             if passport_file is None:
                 st.error("Please upload a passport photo.")
+            elif passport_file.size > 300 * 1024:  # Check file size (300KB in bytes)
+                st.error("Passport photo size must not exceed 300KB.")
             elif not name.strip():
                 st.error("Please enter your name.")
             elif not phone.strip():
@@ -184,9 +186,3 @@ else:
         """,
         unsafe_allow_html=True
     )
-    
-    # Button to reset for another form
-    if st.button("Submit Another Form"):
-        st.session_state.submitted = False
-        st.session_state.data = {}
-        st.rerun()
