@@ -4,12 +4,6 @@ import base64
 from PIL import Image
 import io
 
-# Load logo image as base64 once at start
-with open("logo.png", "rb") as f:
-    logo_bytes = f.read()
-logo_base64 = base64.b64encode(logo_bytes).decode("utf-8")
-logo_html = f'<img src="data:image/png;base64,{logo_base64}" alt="Logo" style="max-width: 200px; display: block; margin: 0 auto 10px auto;">'
-
 # Initialize session state for counter and submission
 if 'member_count' not in st.session_state:
     st.session_state.member_count = 0
@@ -71,11 +65,11 @@ if not st.session_state.submitted:
                     'passport_type': passport_file.type
                 }
                 st.session_state.submitted = True
-                st.experimental_rerun()
+                st.rerun()
 
 else:
     data = st.session_state.data
-    st.title("Your GraciousWord Global Mission Membership Card")
+    st.title("Your GraciousWord Global Mission ID Card")
     
     passport_base64 = ""
     if data['passport_bytes']:
@@ -84,98 +78,88 @@ else:
     st.markdown(
     f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
     .id-card {{
         border: 2px solid #007BFF;
         border-radius: 10px;
         padding: 15px;
-        background-color: #001F3F; /* deep navy background */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: #F8F9FA;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         max-width: 600px;
         width: 95%;
         margin: 0 auto;
         box-sizing: border-box;
         overflow: hidden; /* prevent horizontal scroll */
-        font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-        color: #FFFFFF;
     }}
-
+    /* Centered title (explicit) */
     .id-card h3 {{
-        color: #FFFFFF;
+        color: #007BFF;
         text-align: center;
         margin: 0 0 12px 0;
-        font-size: clamp(22px, 3vw, 24px);
-        font-weight: 700;
-        letter-spacing: 1.2px;
+        font-size: clamp(25px, 3.5vw, 24px);
         text-transform: uppercase;
-        font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-    }}
-
-    .id-card .logo {{
+        font-weight: 650;
         display: block;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 220px;
-        margin-bottom: 10px;
     }}
 
+    /* Horizontal layout: photo left, text right.
+       align-items: stretch makes the photo match the text column's height. */
     .id-card .layout {{
         display: flex;
-        gap: 8px;
-        align-items: stretch;
+        gap: 8px;                 /* smaller gap reduces left whitespace */
+        align-items: stretch;     /* make photo span the bio height */
         flex-direction: row;
         flex-wrap: nowrap;
     }}
 
+    /* Photo column uses a responsive, clamped width (narrower than before) */
     .id-card .photo {{
-        flex: 0 0 clamp(72px, 16vw, 110px);
+        flex: 0 0 clamp(72px, 16vw, 110px); /* narrower width but full height */
         box-sizing: border-box;
     }}
-    .id-card img.passport-photo {{
+    /* Make the image fill the photo column height and crop as needed */
+    .id-card img {{
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: cover;       /* cover ensures it spans height while keeping aspect */
         border: 1px solid #ccc;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         display: block;
     }}
 
+    /* Text column: bigger font, allowed to shrink to avoid overflow */
     .id-card .text {{
         flex: 1 1 auto;
-        min-width: 0;
-        font-size: clamp(14px, 2.8vw, 18px);
+        min-width: 0;  /* allow text to shrink within the flex container */
+        font-size: clamp(13px, 3vw, 18px); /* INCREASED bio font size */
         line-height: 1.35;
-        color: #FFFFFF;
-        padding-left: 6px;
+        color: #333;
+        padding-left: 4px; /* tiny padding so text isn't jammed to the image */
     }}
-
     .id-card .text p {{
         margin: 6px 0;
         padding-bottom: 4px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1px solid #eee;
         word-wrap: break-word;
         overflow-wrap: break-word;
     }}
-
     .id-card .text p:last-child {{
         border-bottom: none;
     }}
 
-    /* Responsive for small screens */
+    /* Very small screens: keep everything legible */
     @media (max-width: 360px) {{
         .id-card {{
             padding: 10px;
         }}
         .id-card h3 {{
-            font-size: 18px;
+            font-size: 16px;
         }}
         .id-card .photo {{
-            flex: 0 0 64px;
+            flex: 0 0 64px; /* smallest width on tiny screens */
         }}
         .id-card .text {{
-            font-size: 13px;
+            font-size: 12.5px;
         }}
         .id-card .text p {{
             margin: 4px 0;
@@ -185,11 +169,10 @@ else:
     </style>
 
     <div class="id-card">
-        {logo_html}
-        <h3>MEMBERSHIP CARD</h3>
+        <h3>GraciousWord Global Mission ID Card</h3>
         <div class="layout">
             <div class="photo">
-                {'<img class="passport-photo" src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #AAA; margin:0;">No passport photo uploaded</p>'}
+                {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888; margin:0;">No passport photo uploaded</p>'}
             </div>
             <div class="text">
                 <p><strong>Unique ID:</strong> {data['unique_id']}</p>
@@ -203,3 +186,8 @@ else:
     """,
     unsafe_allow_html=True
 )
+
+
+
+
+
