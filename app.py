@@ -20,52 +20,58 @@ if not st.session_state.submitted:
     st.title("GraciousWord Global Mission Membership Form")
     
     with st.form(key="membership_form"):
-        # Passport upload
-        passport_file = st.file_uploader("Upload Passport Photo (optional)", type=["jpg", "jpeg", "png"])
+        col1, col2 = st.columns(2)
+        with col1:
+            # Passport upload (mandatory)
+            passport_file = st.file_uploader("Upload Passport Photo", type=["jpg", "jpeg", "png"])
+            
+            # Name
+            name = st.text_input("Name", max_chars=100)
+            
+            # Date of Birth
+            dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
+            
+            # Gender
+            gender = st.radio("Gender", ["Male", "Female"])
+            
+            # Phone / WhatsApp Number
+            phone = st.text_input("Phone / WhatsApp Number", max_chars=20)
         
-        # Name
-        name = st.text_input("Name", max_chars=100)
-        
-        # Date of Birth
-        dob = st.date_input("Date of Birth", min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
-        
-        # Gender
-        gender = st.radio("Gender", ["Male", "Female"])
-        
-        # Phone / WhatsApp Number
-        phone = st.text_input("Phone / WhatsApp Number", max_chars=20)
-        
-        # Residential Address
-        address = st.text_area("Residential Address", max_chars=200)
-        
-        # Occupation
-        occupation = st.text_input("Occupation", max_chars=100)
-        
-        # Branch Affiliation
-        branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"])
-        
-        # Position Held
-        position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"])
-        
-        # Motivation
-        motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500)
+        with col2:
+            # Residential Address
+            address = st.text_area("Residential Address", max_chars=200)
+            
+            # Occupation
+            occupation = st.text_input("Occupation", max_chars=100)
+            
+            # Branch Affiliation
+            branch = st.selectbox("Branch Affiliation", ["Uyo", "Aksu", "Eket"])
+            
+            # Position Held
+            position = st.selectbox("Position Held", ["Pastor", "Evangelist", "Deacon", "Deaconess", "Unit Head", "Worker", "Member"])
+            
+            # Motivation
+            motivation = st.text_area("What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family?", max_chars=500)
         
         # Submit button (always enabled)
         submit_button = st.form_submit_button("Submit")
         
         if submit_button:
-            # Store data and submit
-            st.session_state.data = {
-                'unique_id': get_next_id(),
-                'name': name,
-                'gender': gender,
-                'branch': branch,
-                'position': position,
-                'passport_bytes': passport_file.getvalue() if passport_file else None,
-                'passport_type': passport_file.type if passport_file else None
-            }
-            st.session_state.submitted = True
-            st.rerun()  # Refresh to show ID card
+            if passport_file is None:
+                st.error("Please upload a passport photo.")
+            else:
+                # Store data and submit
+                st.session_state.data = {
+                    'unique_id': get_next_id(),
+                    'name': name,
+                    'gender': gender,
+                    'branch': branch,
+                    'position': position,
+                    'passport_bytes': passport_file.getvalue(),
+                    'passport_type': passport_file.type
+                }
+                st.session_state.submitted = True
+                st.rerun()  # Refresh to show ID card
 
 else:
     data = st.session_state.data
@@ -154,7 +160,7 @@ else:
                     {'<img src="data:' + data['passport_type'] + ';base64,' + passport_base64 + '" alt="Passport Photo">' if data['passport_bytes'] else '<p style="text-align: center; color: #888;">No passport photo uploaded</p>'}
                 </div>
                 <div class="text">
-                    <p><strong>Unique ID:</strong> {data['unique_id']}</p>
+                    <p><strong>Membership ID:</strong> {data['unique_id']}</p>
                     <p><strong>Name:</strong> {data['name'] or 'Not provided'}</p>
                     <p><strong>Gender:</strong> {data['gender'] or 'Not provided'}</p>
                     <p><strong>Branch:</strong> {data['branch'] or 'Not provided'}</p>
@@ -171,4 +177,3 @@ else:
         st.session_state.submitted = False
         st.session_state.data = {}
         st.rerun()
-        
