@@ -37,10 +37,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle form submission
+
+        // Handle form submission
     if (registrationForm) {
         registrationForm.addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // Check if on mobile/tablet — require desktop
+            if (window.innerWidth < 1024) {
+                alert('⚠️ Please view this page on a DESKTOP or LAPTOP for the best experience.\n\nThe ID card layout is optimized for larger screens. Please switch to desktop mode and try again.');
+                return;
+            }
 
             // Validate phone number
             const phone = document.getElementById('phone').value;
@@ -72,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'id-card.html';
         });
     }
+
 
     // Load ID card page content
     if (window.location.pathname.includes("id-card.html")) {
