@@ -1,190 +1,608 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GraciousWord - Member Registration</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gracious Word Global Mission</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Google Fonts: Playfair Display (display/serif) + Work Sans (body/sans) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- Feather Icons -->
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+
+<script>
+  // Extend Tailwind's default theme with our brand tokens
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          royal: {
+            DEFAULT: '#4B1D8F',
+            deep: '#2E0854',
+            light: '#6B3FB0',
+          },
+          gold: {
+            DEFAULT: '#C9A227',
+            light: '#E9C874',
+            soft: '#F6E9C4',
+          },
+          cream: '#FBF8F3',
+          lavender: '#F4EEFB',
+          ink: '#241B33',
+        },
+        fontFamily: {
+          display: ['"Playfair Display"', 'serif'],
+          body: ['"Work Sans"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  :root {
+    --royal: #4B1D8F;
+    --royal-deep: #2E0854;
+    --royal-light: #6B3FB0;
+    --gold: #C9A227;
+    --gold-light: #E9C874;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Work Sans', sans-serif;
+    color: #241B33;
+    background-color: #FBF8F3;
+  }
+
+  h1, h2, h3, .font-display { font-family: 'Playfair Display', serif; }
+
+  /* ---------- Signature element: Gothic "arch window" card shape ----------
+     Church windows are pointed arches. We reuse a soft, rounded arch-top
+     (rather than a plain rectangle or uniform rounded-corner card) across
+     the pastor cards, doctrine cards, ministry cards and branch cards, so
+     the whole page reads as a series of "windows" into the church's life. */
+  .arch-card {
+    border-radius: 9999px 9999px 1rem 1rem / 3.2rem 3.2rem 1rem 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 480px) {
+    .arch-card { border-radius: 9999px 9999px 0.75rem 0.75rem / 2.2rem 2.2rem 0.75rem 0.75rem; }
+  }
+
+  /* Thin radiant gold "rays" divider used beneath the hero and above the CTA —
+     a quiet nod to light breaking through stained glass. */
+  .ray-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold-light) 50%, var(--gold) 80%, transparent);
+    opacity: 0.9;
+  }
+
+  /* Scroll fade-in */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* Sticky nav shadow-on-scroll state */
+  #navbar.scrolled {
+    box-shadow: 0 6px 24px -8px rgba(46, 8, 84, 0.35);
+    background-color: rgba(46, 8, 84, 0.97);
+  }
+
+  /* Visible keyboard focus for accessibility */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 3px;
+  }
+
+  /* Card lift on hover */
+  .lift-hover {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  .lift-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -12px rgba(75, 29, 143, 0.28);
+  }
+
+  /* Gold underline flourish for section headings */
+  .heading-flourish::after {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 3px;
+    margin: 0.85rem auto 0;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 999px;
+  }
+  .heading-flourish.align-left::after { margin: 0.85rem 0 0; }
+
+  /* Hero halo glow behind logo placeholder */
+  .halo-glow {
+    box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.18), 0 0 60px 10px rgba(201, 162, 39, 0.25);
+  }
+
+  /* Mobile nav panel */
+  #mobileMenu { transition: max-height 0.4s ease; overflow: hidden; }
+</style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen font-poppins">
 
-    <header class="w-full bg-gradient-to-r from-purple-700 to-blue-700 py-10 shadow-lg">
-        <div class="container mx-auto px-4 flex flex-col items-center justify-center">
-            
-            <!-- Logo and Title on Same Line -->
-            <div class="flex items-center justify-center gap-6">
-                <!-- Logo -->
-                <div class="w-24 h-24 bg-#006b71 rounded-full shadow-lg flex items-center justify-center border-4 border-purple-300 overflow-hidden shrink-0">
-                    <img src="logo.png" alt="GRACIOUS WORD logo" class="w-full h-full object-contain" />
-                </div>
+<body class="bg-cream text-ink antialiased">
 
-                <!-- Title as Image -->
-                <div class="flex items-center justify-center">
-                    <img src="name.png" alt="GraciousWord Global Mission" class="h-20 md:h-28 object-contain" />
-                </div>
-            </div>
+<!-- ============================= NAVIGATION ============================= -->
+<nav id="navbar" class="fixed top-0 left-0 w-full z-50 bg-royal-deep/90 backdrop-blur-sm transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between h-16 md:h-20">
+    <a href="#hero" class="flex items-center gap-3">
+      <span class="w-9 h-9 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center text-royal-deep font-display font-bold text-sm">GW</span>
+      <span class="text-white font-display font-semibold tracking-wide text-sm sm:text-base">Gracious Word Global Mission</span>
+    </a>
+
+    <!-- Desktop links -->
+    <div class="hidden md:flex items-center gap-8 text-sm text-white/85 font-medium">
+      <a href="#welcome" class="hover:text-gold-light transition-colors">Home</a>
+      <a href="#vision" class="hover:text-gold-light transition-colors">Vision</a>
+      <a href="#ministries" class="hover:text-gold-light transition-colors">Ministries</a>
+      <a href="#branches" class="hover:text-gold-light transition-colors">Branches</a>
+      <a href="ID_App.html" class="ml-2 bg-gold hover:bg-gold-light text-royal-deep font-semibold px-5 py-2 rounded-full transition-colors shadow-md">
+        Register
+      </a>
+    </div>
+
+    <!-- Mobile toggle -->
+    <button id="menuBtn" aria-label="Toggle menu" aria-expanded="false" class="md:hidden text-white">
+      <i data-feather="menu" class="w-7 h-7"></i>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="md:hidden max-h-0 bg-royal-deep/98 px-5">
+    <div class="flex flex-col gap-4 py-5 text-white/90 font-medium">
+      <a href="#welcome" class="mobile-link">Home</a>
+      <a href="#vision" class="mobile-link">Vision</a>
+      <a href="#ministries" class="mobile-link">Ministries</a>
+      <a href="#branches" class="mobile-link">Branches</a>
+      <a href="ID_App.html" class="mobile-link text-gold-light">Register Now</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================= HERO SECTION ============================= -->
+<header id="hero" class="relative min-h-screen flex items-center pt-24 pb-16">
+  <!-- Background image + overlay -->
+  <div class="absolute inset-0 -z-10">
+    <img
+      src="https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=1920&auto=format&fit=crop"
+      alt="Worship gathering background"
+      class="w-full h-full object-cover"
+    />
+    <div class="absolute inset-0 bg-gradient-to-b from-royal-deep/90 via-royal-deep/80 to-royal-deep/95"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 w-full">
+    <div class="flex flex-col md:flex-row items-center gap-10 md:gap-16">
+
+      <!-- Logo placeholder -->
+      <div class="reveal shrink-0 order-1 md:order-1">
+        <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-royal-light/40 border-2 border-gold/60 halo-glow flex items-center justify-center mx-auto">
+          <span class="font-display text-gold-light text-xs sm:text-sm tracking-widest text-center px-4">CHURCH<br/>LOGO</span>
         </div>
-    </header>
-    
-    <main class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="md:flex">
-                <div class="md:w-1/3 bg-gradient-to-b from-purple-600 to-blue-600 p-8 text-white flex flex-col justify-center">
-                    <div class="text-center mb-8">
-                        <i data-feather="users" class="w-16 h-16 mx-auto"></i>
-                        <h2 class="text-2xl font-playfair font-bold mt-4">Join Our Spiritual Family</h2>
-                    </div>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <i data-feather="check-circle" class="mr-2 mt-1 text-green-200"></i>
-                            <span>Become an official member</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i data-feather="check-circle" class="mr-2 mt-1 text-green-200"></i>
-                            <span>Receive your digital ID card</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i data-feather="check-circle" class="mr-2 mt-1 text-green-200"></i>
-                            <span>Connect with your church family</span>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="md:w-2/3 p-8">
-                    <h1 class="text-3xl font-playfair font-bold text-purple-800 mb-6 text-center">Member Registration</h1>
-                    <form id="registrationForm" class="space-y-6">
-                        <!-- Passport Photo -->
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Passport Photograph *</label>
-                            <div class="mt-1 flex items-center">
-                                <div class="relative group">
-                                    <div class="w-24 h-24 rounded-full bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
-                                        <img id="passportPreview" class="hidden w-full h-full object-cover" />
-                                        <div id="uploadText" class="text-center p-2">
-                                            <i data-feather="upload" class="w-6 h-6 mx-auto text-gray-400"></i>
-                                            <span class="text-xs text-gray-500">JPG/PNG (max 300KB)</span>
-                                        </div>
-                                    </div>
-                                    <input type="file" id="passportPhoto" name="passportPhoto" accept=".jpg,.jpeg,.png" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
-                                </div>
-                                <span class="ml-4 text-sm text-gray-500">Clear face photo on plain background</span>
-                            </div>
-                        </div>
+      </div>
 
-                        <!-- Personal Information -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Full Name -->
-                            <div>
-                                <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name *</label>
-                                <input type="text" id="fullName" name="fullName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                            </div>
-                            
-                            <!-- Date of Birth -->
-                            <div>
-                                <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth *</label>
-                                <input type="date" id="dob" name="dob" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                            </div>
-                            
-                            <!-- Registration Date -->
-                            <div>
-                                <label for="regDate" class="block text-sm font-medium text-gray-700">Registration Date *</label>
-                                <input type="date" id="regDate" name="regDate" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                            </div>
-                            
-                            <!-- Gender -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Gender *</label>
-                                <div class="mt-1 flex space-x-4">
-                                    <div class="flex items-center">
-                                        <input id="male" name="gender" type="radio" value="Male" required class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300">
-                                        <label for="male" class="ml-2 block text-sm text-gray-700">Male</label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input id="female" name="gender" type="radio" value="Female" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300">
-                                        <label for="female" class="ml-2 block text-sm text-gray-700">Female</label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Phone Number -->
-                            <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700">Phone / WhatsApp Number *</label>
-                                <input type="tel" id="phone" name="phone" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" pattern="[0-9]{11}">
-                                <p class="mt-1 text-xs text-gray-500">11-digit Nigerian number (e.g., 08012345678)</p>
-                            </div>
-                            
-                            <!-- Occupation -->
-                            <div>
-                                <label for="occupation" class="block text-sm font-medium text-gray-700">Occupation *</label>
-                                <input type="text" id="occupation" name="occupation" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                            </div>
-                        </div>
-                        
-                        <!-- Residential Address -->
-                        <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700">Residential Address *</label>
-                            <textarea id="address" name="address" rows="2" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"></textarea>
-                        </div>
-                        
-                        <!-- Church Information -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Branch -->
-                            <div>
-                                <label for="branch" class="block text-sm font-medium text-gray-700">Branch Affiliation *</label>
-                                <select id="branch" name="branch" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                                    <option value="">Select branch</option>
-                                    <option value="Uyo">Uyo</option>
-                                    <option value="AKSU">AKSU</option>
-                                    <option value="Eket">Eket</option>
-                                </select>
-                            </div>
-                            
-                            <!-- Position -->
-                            <div>
-                                <label for="position" class="block text-sm font-medium text-gray-700">Position Held *</label>
-                                <select id="position" name="position" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
-                                    <option value="">Select position</option>
-                                    <option value="Pastor">Pastor</option>
-                                    <option value="Evangelist">Evangelist</option>
-                                    <option value="Deacon">Deacon</option>
-                                    <option value="Deaconess">Deaconess</option>
-                                    <option value="Unit Head">Unit Head</option>
-                                    <option value="Worker">Worker</option>
-                                    <option value="Member">Member</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Motivation Essay -->
-                        <div>
-                            <label for="motivation" class="block text-sm font-medium text-gray-700">What has drawn you to join GraciousWord Global Mission, and how do you hope to grow in your faith through this family? *</label>
-                            <textarea id="motivation" name="motivation" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"></textarea>
-                        </div>
-                        
-                        <!-- Submit Button -->
-                        <div class="pt-4">
-                            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200">
-                                Complete Registration
-                                <i data-feather="arrow-right" class="ml-2 w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+      <!-- Hero copy -->
+      <div class="reveal text-center md:text-left order-2 md:order-2">
+        <h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl text-white leading-tight tracking-tight">
+          GRACIOUS WORD<br class="hidden sm:block"/> GLOBAL MISSION
+        </h1>
+
+        <p class="mt-5 font-display italic text-gold-light text-lg sm:text-xl max-w-xl mx-auto md:mx-0">
+          "&hellip;bringing the God&#8209;time to men."
+        </p>
+
+        <p class="mt-3 text-white/85 text-base sm:text-lg tracking-wide max-w-xl mx-auto md:mx-0">
+          Living Christ. Loving People. Making Disciples.
+        </p>
+
+        <div class="mt-9 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <a href="ID_App.html"
+             class="bg-gold hover:bg-gold-light text-royal-deep font-semibold px-8 py-3.5 rounded-full shadow-lg shadow-gold/20 transition-all duration-300 hover:-translate-y-0.5 text-center">
+            Join Our Family
+          </a>
+          <a href="#welcome"
+             class="border border-white/40 hover:border-gold-light hover:text-gold-light text-white font-semibold px-8 py-3.5 rounded-full transition-all duration-300 text-center">
+            Learn More
+          </a>
         </div>
-    </main>
+      </div>
+    </div>
+  </div>
 
-    <custom-footer></custom-footer>
+  <!-- ray divider at base of hero -->
+  <div class="absolute bottom-0 left-0 w-full ray-divider"></div>
+</header>
 
-    <script src="components/header.js"></script>
-    <script src="components/footer.js"></script>
-    <script src="script.js"></script>
-    <script>
-        feather.replace();
-    </script>
+<!-- ============================= WELCOME SECTION ============================= -->
+<section id="welcome" class="py-20 sm:py-28 px-5 sm:px-8 bg-cream">
+  <div class="max-w-4xl mx-auto text-center reveal">
+    <h2 class="font-display font-bold text-3xl sm:text-4xl text-royal-deep heading-flourish">Welcome Home</h2>
+    <p class="mt-8 text-base sm:text-lg leading-relaxed text-ink/80">
+      Welcome to Gracious Word Global Mission, a Christ-centred church committed to raising disciples,
+      teaching the Gospel of Grace, and helping people discover and fulfil God's purpose for their lives.
+      Whether you are visiting for the first time or looking for a church family, there is a place for you here.
+    </p>
+  </div>
+
+  <!-- LEAD PASTORS -->
+  <div class="max-w-5xl mx-auto mt-16 grid sm:grid-cols-2 gap-8 sm:gap-10">
+    <!-- Card One -->
+    <div class="reveal arch-card bg-white shadow-xl lift-hover p-8 pt-10 text-center border border-royal/5">
+      <div class="w-28 h-28 mx-auto rounded-full bg-lavender border-4 border-gold/40 flex items-center justify-center overflow-hidden">
+        <span class="text-royal/50 text-xs font-medium text-center px-2">Pastor Photo</span>
+      </div>
+      <h3 class="mt-6 font-display font-semibold text-xl text-royal-deep">Pastor Georgewealth</h3>
+      <p class="text-gold text-sm font-medium tracking-wide mt-1">Lead Pastor</p>
+      <p class="mt-4 italic text-ink/70 text-sm leading-relaxed">
+        "Our calling is to help people know Christ, grow in grace and walk in God's purpose."
+      </p>
+    </div>
+
+    <!-- Card Two -->
+    <div class="reveal arch-card bg-white shadow-xl lift-hover p-8 pt-10 text-center border border-royal/5">
+      <div class="w-28 h-28 mx-auto rounded-full bg-lavender border-4 border-gold/40 flex items-center justify-center overflow-hidden">
+        <span class="text-royal/50 text-xs font-medium text-center px-2">Pastor Photo</span>
+      </div>
+      <h3 class="mt-6 font-display font-semibold text-xl text-royal-deep">Pastor Ronke</h3>
+      <p class="text-gold text-sm font-medium tracking-wide mt-1">Lead Pastor</p>
+      <p class="mt-4 italic text-ink/70 text-sm leading-relaxed">
+        "Every believer deserves a loving church family where faith, purpose and destiny are nurtured."
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= VISION / MISSION / PURPOSE ============================= -->
+<section id="vision" class="py-20 sm:py-28 px-5 sm:px-8 bg-lavender">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+
+    <div class="reveal arch-card bg-white shadow-lg lift-hover p-8 pt-10 text-center">
+      <div class="w-14 h-14 mx-auto rounded-full bg-royal/10 flex items-center justify-center">
+        <i data-feather="eye" class="text-royal w-6 h-6"></i>
+      </div>
+      <h3 class="mt-5 font-display font-bold text-xl text-royal-deep">Our Vision</h3>
+      <p class="mt-4 text-ink/75 leading-relaxed italic">"&hellip;bringing the God&#8209;time to men."</p>
+    </div>
+
+    <div class="reveal arch-card bg-white shadow-lg lift-hover p-8 pt-10 text-center">
+      <div class="w-14 h-14 mx-auto rounded-full bg-royal/10 flex items-center justify-center">
+        <i data-feather="compass" class="text-royal w-6 h-6"></i>
+      </div>
+      <h3 class="mt-5 font-display font-bold text-xl text-royal-deep">Our Mission</h3>
+      <p class="mt-4 text-ink/75 leading-relaxed">
+        "&hellip;to live Christ, love and teach people of all nations, languages and cultures the message of God's love to mankind."
+      </p>
+    </div>
+
+    <div class="reveal arch-card bg-white shadow-lg lift-hover p-8 pt-10 text-center">
+      <div class="w-14 h-14 mx-auto rounded-full bg-royal/10 flex items-center justify-center">
+        <i data-feather="target" class="text-royal w-6 h-6"></i>
+      </div>
+      <h3 class="mt-5 font-display font-bold text-xl text-royal-deep">Our Purpose</h3>
+      <p class="mt-4 text-ink/75 leading-relaxed">
+        We believe that commitment to the Great Commandment and the Great Commission will grow a great church.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================= WHY JOIN US ============================= -->
+<section class="py-20 sm:py-28 px-5 sm:px-8 bg-cream">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <h2 class="font-display font-bold text-3xl sm:text-4xl text-royal-deep heading-flourish">Why Join Us</h2>
+  </div>
+
+  <div class="max-w-6xl mx-auto mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+    <!-- Icon cards -->
+    <div class="reveal lift-hover bg-white rounded-2xl shadow-md p-7 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-gold-soft flex items-center justify-center">
+        <i data-feather="feather" class="text-gold w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Gospel of Grace</h3>
+    </div>
+
+    <div class="reveal lift-hover bg-white rounded-2xl shadow-md p-7 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-gold-soft flex items-center justify-center">
+        <i data-feather="book-open" class="text-gold w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Biblical Teaching</h3>
+    </div>
+
+    <div class="reveal lift-hover bg-white rounded-2xl shadow-md p-7 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-gold-soft flex items-center justify-center">
+        <i data-feather="heart" class="text-gold w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Loving Community</h3>
+    </div>
+
+    <div class="reveal lift-hover bg-white rounded-2xl shadow-md p-7 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-gold-soft flex items-center justify-center">
+        <i data-feather="wind" class="text-gold w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Freedom of Worship</h3>
+    </div>
+
+    <div class="reveal lift-hover bg-white rounded-2xl shadow-md p-7 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-gold-soft flex items-center justify-center">
+        <i data-feather="trending-up" class="text-gold w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Spiritual Growth</h3>
+    </div>
+
+    <div class="reveal lift-hover bg-white rounded-2xl shadow-md p-7 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-gold-soft flex items-center justify-center">
+        <i data-feather="users" class="text-gold w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Serving with Purpose</h3>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= OUR MINISTRIES ============================= -->
+<section id="ministries" class="py-20 sm:py-28 px-5 sm:px-8 bg-royal-deep">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <h2 class="font-display font-bold text-3xl sm:text-4xl text-white heading-flourish">Our Ministries</h2>
+    <p class="mt-4 text-white/70">There is a place to serve for every gift.</p>
+  </div>
+
+  <div id="ministriesGrid" class="max-w-6xl mx-auto mt-14 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+    <!-- Filled by JS to keep markup DRY: name + feather icon pairs -->
+  </div>
+</section>
+
+<!-- ============================= CALL TO ACTION ============================= -->
+<section class="relative py-20 sm:py-28 px-5 sm:px-8 bg-gradient-to-br from-royal via-royal-light to-royal-deep text-center overflow-hidden">
+  <div class="absolute inset-0 ray-divider top-0 bottom-auto"></div>
+  <div class="max-w-3xl mx-auto reveal">
+    <h2 class="font-display font-bold text-3xl sm:text-4xl text-white">Become Part of Our Family</h2>
+    <p class="mt-5 text-white/85 text-base sm:text-lg leading-relaxed">
+      There is a place for you at Gracious Word Global Mission. Join a family committed to Christ,
+      committed to His Word and committed to one another.
+    </p>
+    <a href="ID_App.html"
+       class="inline-block mt-9 bg-gold hover:bg-gold-light text-royal-deep font-semibold px-10 py-4 rounded-full shadow-xl transition-all duration-300 hover:-translate-y-1 text-lg">
+      Register Now
+    </a>
+  </div>
+  <div class="absolute inset-x-0 bottom-0 ray-divider"></div>
+</section>
+
+<!-- ============================= CHURCH BRANCHES ============================= -->
+<section id="branches" class="py-20 sm:py-28 px-5 sm:px-8 bg-cream">
+  <div class="max-w-3xl mx-auto text-center reveal">
+    <h2 class="font-display font-bold text-3xl sm:text-4xl text-royal-deep heading-flourish">Our Church Branches</h2>
+  </div>
+
+  <div class="max-w-6xl mx-auto mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+
+    <div class="reveal arch-card bg-white shadow-md lift-hover p-7 pt-9 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-royal/10 flex items-center justify-center">
+        <i data-feather="map-pin" class="text-royal w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Uyo City Headquarters</h3>
+      <p class="text-gold text-xs font-semibold uppercase tracking-wider mt-1">Headquarters</p>
+      <p class="mt-3 text-ink/60 text-sm">(Add headquarters address here)</p>
+      <button class="mt-5 text-sm font-medium text-royal border border-royal/30 hover:bg-royal hover:text-white transition-colors rounded-full px-5 py-2">
+        View on Map
+      </button>
+    </div>
+
+    <div class="reveal arch-card bg-white shadow-md lift-hover p-7 pt-9 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-royal/10 flex items-center justify-center">
+        <i data-feather="map-pin" class="text-royal w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Port Harcourt Branch</h3>
+      <p class="mt-3 text-ink/60 text-sm">(Add Port Harcourt address here)</p>
+      <button class="mt-5 text-sm font-medium text-royal border border-royal/30 hover:bg-royal hover:text-white transition-colors rounded-full px-5 py-2">
+        View on Map
+      </button>
+    </div>
+
+    <div class="reveal arch-card bg-white shadow-md lift-hover p-7 pt-9 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-royal/10 flex items-center justify-center">
+        <i data-feather="map-pin" class="text-royal w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">Eket Branch</h3>
+      <p class="mt-3 text-ink/60 text-sm">(Add Eket address here)</p>
+      <button class="mt-5 text-sm font-medium text-royal border border-royal/30 hover:bg-royal hover:text-white transition-colors rounded-full px-5 py-2">
+        View on Map
+      </button>
+    </div>
+
+    <div class="reveal arch-card bg-white shadow-md lift-hover p-7 pt-9 text-center border border-royal/5">
+      <div class="w-12 h-12 mx-auto rounded-full bg-royal/10 flex items-center justify-center">
+        <i data-feather="map-pin" class="text-royal w-5 h-5"></i>
+      </div>
+      <h3 class="mt-5 font-display font-semibold text-lg text-royal-deep">AKSU Branch</h3>
+      <p class="mt-3 text-ink/60 text-sm">(Add AKSU address here)</p>
+      <button class="mt-5 text-sm font-medium text-royal border border-royal/30 hover:bg-royal hover:text-white transition-colors rounded-full px-5 py-2">
+        View on Map
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================= SCRIPTURE SECTION ============================= -->
+<section class="relative py-28 sm:py-36 px-5 sm:px-8 text-center">
+  <div class="absolute inset-0 -z-10">
+    <img
+      src="https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=1920&auto=format&fit=crop"
+      alt="Open Bible background"
+      class="w-full h-full object-cover"
+    />
+    <div class="absolute inset-0 bg-royal-deep/85"></div>
+  </div>
+  <div class="max-w-2xl mx-auto reveal">
+    <p class="font-display italic text-xl sm:text-2xl text-white leading-relaxed">
+      "Therefore, go and make disciples of all nations&hellip; teaching them to obey everything I have commanded you."
+    </p>
+    <p class="mt-5 text-gold-light font-medium tracking-wide">Matthew 28:19&ndash;20</p>
+  </div>
+</section>
+
+<!-- ============================= FOOTER ============================= -->
+<footer class="bg-royal-deep text-white/80 pt-16 pb-8 px-5 sm:px-8">
+  <div class="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+    <!-- Logo + vision -->
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-light to-gold flex items-center justify-center text-royal-deep font-display font-bold text-sm">GW</span>
+        <span class="text-white font-display font-semibold">Gracious Word Global Mission</span>
+      </div>
+      <p class="mt-4 text-sm italic text-white/60">"&hellip;bringing the God&#8209;time to men."</p>
+    </div>
+
+    <!-- Quick links -->
+    <div>
+      <h4 class="text-gold-light font-display font-semibold mb-4">Quick Links</h4>
+      <ul class="space-y-2 text-sm">
+        <li><a href="#hero" class="hover:text-gold-light transition-colors">Home</a></li>
+        <li><a href="ID_App.html" class="hover:text-gold-light transition-colors">Register</a></li>
+        <li><a href="#vision" class="hover:text-gold-light transition-colors">Vision</a></li>
+        <li><a href="#ministries" class="hover:text-gold-light transition-colors">Ministries</a></li>
+        <li><a href="#branches" class="hover:text-gold-light transition-colors">Branches</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact -->
+    <div>
+      <h4 class="text-gold-light font-display font-semibold mb-4">Contact</h4>
+      <ul class="space-y-2 text-sm">
+        <li class="flex items-center gap-2"><i data-feather="mail" class="w-4 h-4"></i> info@graciousword.org</li>
+        <li class="flex items-center gap-2"><i data-feather="phone" class="w-4 h-4"></i> (Add phone number here)</li>
+      </ul>
+    </div>
+
+    <!-- Social -->
+    <div>
+      <h4 class="text-gold-light font-display font-semibold mb-4">Follow Us</h4>
+      <div class="flex gap-3">
+        <a href="#" aria-label="Facebook" class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold hover:text-royal-deep flex items-center justify-center transition-colors"><i data-feather="facebook" class="w-4 h-4"></i></a>
+        <a href="#" aria-label="Instagram" class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold hover:text-royal-deep flex items-center justify-center transition-colors"><i data-feather="instagram" class="w-4 h-4"></i></a>
+        <a href="#" aria-label="YouTube" class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold hover:text-royal-deep flex items-center justify-center transition-colors"><i data-feather="youtube" class="w-4 h-4"></i></a>
+        <a href="#" aria-label="TikTok" class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold hover:text-royal-deep flex items-center justify-center transition-colors"><i data-feather="music" class="w-4 h-4"></i></a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="ray-divider max-w-6xl mx-auto mt-12"></div>
+
+  <p class="text-center text-xs text-white/50 mt-6" id="copyrightText">
+    <!-- Year populated dynamically by JS -->
+  </p>
+</footer>
+
+<!-- ============================= JAVASCRIPT ============================= -->
+<script>
+  // Initialize Feather icons
+  feather.replace();
+
+  // --- Dynamic copyright year (never hardcoded) ---
+  document.getElementById('copyrightText').textContent =
+    `© ${new Date().getFullYear()} Gracious Word Global Mission. All Rights Reserved.`;
+
+  // --- Mobile menu toggle ---
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  let menuOpen = false;
+
+  menuBtn.addEventListener('click', () => {
+    menuOpen = !menuOpen;
+    mobileMenu.style.maxHeight = menuOpen ? mobileMenu.scrollHeight + 'px' : '0px';
+    menuBtn.setAttribute('aria-expanded', menuOpen);
+    menuBtn.innerHTML = menuOpen ? '<i data-feather="x" class="w-7 h-7"></i>' : '<i data-feather="menu" class="w-7 h-7"></i>';
+    feather.replace();
+  });
+
+  // Close mobile menu after tapping a link
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => {
+      menuOpen = false;
+      mobileMenu.style.maxHeight = '0px';
+      menuBtn.innerHTML = '<i data-feather="menu" class="w-7 h-7"></i>';
+      feather.replace();
+    });
+  });
+
+  // --- Sticky nav shadow/background on scroll ---
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // --- Scroll-triggered fade-in reveal ---
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // --- Ministries data rendered programmatically (name + Feather icon) ---
+  const ministries = [
+    { name: 'Music', icon: 'music' },
+    { name: 'Protocol', icon: 'shield' },
+    { name: 'Security', icon: 'lock' },
+    { name: 'Hospitality', icon: 'coffee' },
+    { name: 'Dance & Drama', icon: 'star' },
+    { name: 'Administration', icon: 'clipboard' },
+    { name: 'Missions', icon: 'globe' },
+    { name: 'Publicity', icon: 'volume-2' },
+    { name: 'Media', icon: 'camera' },
+    { name: 'Technical', icon: 'settings' },
+    { name: 'Children', icon: 'smile' },
+    { name: 'Youth', icon: 'zap' },
+    { name: 'Women', icon: 'heart' },
+  ];
+
+  const grid = document.getElementById('ministriesGrid');
+  ministries.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'reveal lift-hover bg-white/10 hover:bg-white/15 rounded-2xl p-6 text-center border border-white/10';
+    card.innerHTML = `
+      <div class="w-11 h-11 mx-auto rounded-full bg-gold/20 flex items-center justify-center">
+        <i data-feather="${m.icon}" class="text-gold-light w-5 h-5"></i>
+      </div>
+      <p class="mt-4 text-white font-medium text-sm">${m.name}</p>
+    `;
+    grid.appendChild(card);
+    observer.observe(card);
+  });
+  feather.replace();
+</script>
+
 </body>
 </html>
