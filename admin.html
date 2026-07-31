@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Dashboard — Gracious Word Global Mission</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/admin.css" />
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body class="admin-body">
+
+<!-- ---- Login gate ---- -->
+<section id="loginGate" class="login-gate">
+  <form id="loginForm" class="login-card" novalidate>
+    <span class="logo-badge">GW</span>
+    <h1 class="font-display">Admin Access</h1>
+    <p>Enter the admin password to continue.</p>
+    <input type="password" id="adminPassword" placeholder="Admin password" autocomplete="current-password" required />
+    <span class="field-error" id="loginError" role="alert"></span>
+    <button type="submit" id="loginBtn" class="btn btn-primary">
+      <i data-feather="lock"></i> Sign In
+    </button>
+  </form>
+</section>
+
+<!-- ---- Dashboard (hidden until authenticated) ---- -->
+<div id="adminApp" hidden>
+  <header class="admin-header">
+    <a href="index.html" class="reg-logo"><span class="logo-badge">GW</span><span>GWGM Admin</span></a>
+    <button id="logoutBtn" class="btn btn-secondary"><i data-feather="log-out"></i> Sign Out</button>
+  </header>
+
+  <main class="admin-main">
+    <!-- Stat cards -->
+    <section class="stat-grid" aria-label="Summary statistics">
+      <div class="stat-card"><span class="stat-label">Total Members</span><span class="stat-value" id="statTotal">—</span></div>
+      <div class="stat-card"><span class="stat-label">Total Branches</span><span class="stat-value" id="statBranches">—</span></div>
+      <div class="stat-card"><span class="stat-label">Registrations Today</span><span class="stat-value" id="statToday">—</span></div>
+      <div class="stat-card"><span class="stat-label">Registrations This Month</span><span class="stat-value" id="statMonth">—</span></div>
+    </section>
+
+    <!-- Toolbar -->
+    <section class="toolbar">
+      <div class="toolbar-search">
+        <i data-feather="search"></i>
+        <input type="search" id="searchInput" placeholder="Search by name, email, phone, or ID…" />
+      </div>
+      <select id="branchFilter"><option value="">All Branches</option></select>
+      <select id="sortSelect">
+        <option value="created_at-desc">Newest First</option>
+        <option value="created_at-asc">Oldest First</option>
+        <option value="full_name-asc">Name (A–Z)</option>
+        <option value="full_name-desc">Name (Z–A)</option>
+      </select>
+      <button id="exportCsvBtn" class="btn btn-secondary"><i data-feather="download"></i> CSV</button>
+      <button id="exportXlsxBtn" class="btn btn-secondary"><i data-feather="file"></i> Excel</button>
+      <button id="printListBtn" class="btn btn-secondary"><i data-feather="printer"></i> Print</button>
+    </section>
+
+    <!-- Members table -->
+    <section class="table-wrap">
+      <table id="membersTable">
+        <thead>
+          <tr>
+            <th>Photo</th><th>Membership ID</th><th>Name</th><th>Branch</th>
+            <th>Phone</th><th>Position</th><th>Registered</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="membersTbody">
+          <tr><td colspan="8" class="table-empty">Loading members…</td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" id="pagination"></div>
+    </section>
+  </main>
+
+  <!-- View/Edit modal -->
+  <div id="memberModal" class="modal" hidden>
+    <div class="modal-content">
+      <button id="closeModalBtn" class="modal-close" aria-label="Close">&times;</button>
+      <h2 class="font-display" id="modalTitle">Member Details</h2>
+      <form id="editForm" class="modal-form"></form>
+      <div class="modal-actions">
+        <button id="saveEditBtn" class="btn btn-primary"><i data-feather="save"></i> Save Changes</button>
+        <button id="deleteMemberBtn" class="btn btn-danger"><i data-feather="trash-2"></i> Delete Member</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/config.js"></script>
+<script type="module" src="js/admin.js"></script>
+<script>feather.replace();</script>
+</body>
+</html>

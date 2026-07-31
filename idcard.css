@@ -1,0 +1,155 @@
+.card-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+  text-align: center;
+}
+
+.card-page-title {
+  color: var(--royal-deep);
+  font-size: 1.7rem;
+  margin-bottom: 2rem;
+}
+
+.loading-state, .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+  color: var(--royal-deep);
+}
+.spinner-dark {
+  border-color: rgba(75, 29, 143, 0.25);
+  border-top-color: var(--royal);
+  width: 32px; height: 32px;
+}
+.error-state svg { color: var(--danger); width: 40px; height: 40px; }
+
+/* ---- The ID Card itself ---- */
+.id-card {
+  background: linear-gradient(135deg, #fff 0%, var(--lavender) 100%);
+  border: 1px solid rgba(75, 29, 143, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  max-width: 460px;
+  margin: 0 auto;
+  animation: cardIn 0.6s ease;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.id-card-header {
+  background: var(--royal-deep);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+.id-card-logo {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: var(--royal-deep);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-family: var(--font-display);
+  flex-shrink: 0;
+}
+.id-card-org { display: flex; flex-direction: column; text-align: left; line-height: 1.25; }
+.id-card-org strong { font-family: var(--font-display); font-size: 0.95rem; }
+.id-card-org span { font-size: 0.7rem; color: var(--gold-light); font-style: italic; }
+
+.id-card-body {
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.id-card-photo {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--gold);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.id-card-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+.id-card-details { width: 100%; }
+.id-card-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--royal-deep);
+  margin: 0 0 0.6rem;
+}
+.id-card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed rgba(75, 29, 143, 0.15);
+  gap: 1rem;
+}
+.id-card-row span { color: rgba(36, 27, 51, 0.55); }
+.id-card-row strong { color: var(--royal-deep); text-align: right; }
+
+.id-card-qr canvas { border-radius: 0.5rem; }
+
+.id-card-footer {
+  background: var(--gold-soft);
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.id-card-signature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+.signature-img { height: 28px; object-fit: contain; }
+.id-card-signature span { font-size: 0.65rem; color: rgba(36, 27, 51, 0.6); }
+.id-card-valid {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--royal-deep);
+  background: #fff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+}
+
+/* ---- Desktop: switch to horizontal layout ---- */
+@media (min-width: 700px) {
+  .id-card { max-width: 640px; }
+  .id-card-body {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+  }
+  .id-card-details { flex: 1; }
+  .id-card-row strong { text-align: right; }
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+/* Print styles: show only the card */
+@media print {
+  .reg-header, .card-page-title, .card-actions, .skip-link { display: none !important; }
+  body { background: #fff; }
+  .id-card { box-shadow: none; border: 1px solid #ccc; }
+}

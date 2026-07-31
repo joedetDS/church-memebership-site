@@ -356,162 +356,8 @@
   </div>
 </div>
 
-<!-- ============================= ADMIN MODALS ============================= -->
-<!-- Step 1: restricted-action confirmation -->
-<div id="adminConfirmModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-  <div class="view-fade bg-paper rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-    <div class="mx-auto w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-      <i data-feather="shield" class="w-5 h-5 text-amber-600"></i>
-    </div>
-    <h3 class="font-display text-lg text-brand mb-1.5">Restricted action</h3>
-    <p class="text-sm text-slate/80 mb-5">This action is only accessible to an administrator. Do you want to continue?</p>
-    <div class="flex gap-3 justify-center">
-      <button id="adminConfirmYes" class="btn-hover bg-brand hover:bg-brand2 text-white text-sm font-medium px-5 py-2.5 rounded-lg">Yes</button>
-      <button id="adminConfirmNo" class="btn-hover border border-brand/20 hover:border-accent text-brand text-sm font-medium px-5 py-2.5 rounded-lg">No</button>
-    </div>
-  </div>
-</div>
-
-<!-- Step 2: super admin login -->
-<div id="adminLoginModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm px-4">
-  <div class="view-fade bg-paper rounded-2xl shadow-2xl w-full max-w-sm p-6">
-
-    <div id="adminLoginForm">
-      <div class="mx-auto w-12 h-12 rounded-full bg-accentsoft/20 flex items-center justify-center mb-4">
-        <i data-feather="lock" class="w-5 h-5 text-accent"></i>
-      </div>
-      <h3 class="font-display text-lg text-brand text-center mb-1">Super admin access</h3>
-      <p class="text-xs text-slate/70 text-center mb-5">Enter your credentials to continue.</p>
-
-      <div class="grid gap-3">
-        <div>
-          <label for="adminNameInput" class="block text-xs font-semibold uppercase tracking-wide text-slate mb-1">Super admin name</label>
-          <div class="field-focus rounded-lg border border-brand/15 bg-white transition">
-            <input id="adminNameInput" type="text" autocomplete="off"
-              class="w-full bg-transparent px-3.5 py-2.5 rounded-lg outline-none text-brand text-sm" />
-          </div>
-        </div>
-        <div>
-          <label for="adminPasswordInput" class="block text-xs font-semibold uppercase tracking-wide text-slate mb-1">Password</label>
-          <div class="field-focus rounded-lg border border-brand/15 bg-white transition">
-            <input id="adminPasswordInput" type="password" autocomplete="off"
-              class="w-full bg-transparent px-3.5 py-2.5 rounded-lg outline-none text-brand text-sm" />
-          </div>
-        </div>
-      </div>
-
-      <p id="adminLoginError" class="hidden text-xs text-red-600 mt-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></p>
-
-      <div class="flex gap-3 mt-5">
-        <button id="adminLoginSubmit" class="btn-hover flex-1 bg-brand hover:bg-brand2 text-white text-sm font-medium px-4 py-2.5 rounded-lg">Verify &amp; continue</button>
-        <button id="adminLoginCancel" class="btn-hover border border-brand/20 hover:border-accent text-brand text-sm font-medium px-4 py-2.5 rounded-lg">Cancel</button>
-      </div>
-    </div>
-
-    <div id="adminDeniedView" class="hidden text-center">
-      <div class="mx-auto w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
-        <i data-feather="x-octagon" class="w-5 h-5 text-red-600"></i>
-      </div>
-      <h3 class="font-display text-lg text-brand mb-1.5">Access denied</h3>
-      <p class="text-sm text-slate/80 mb-5">You are not allowed access to this page.</p>
-      <button id="adminReturnHomeBtn" class="btn-hover inline-flex items-center gap-2 bg-brand hover:bg-brand2 text-white text-sm font-medium px-5 py-2.5 rounded-lg">
-        <i data-feather="home" class="w-4 h-4"></i>
-        Return home
-      </button>
-    </div>
-  </div>
-</div>
-
 <script>
   feather.replace();
-
-  // ============================= Super admin access gate =============================
-  // NOTE: this is a client-side UI gate for day-to-day accidental-click
-  // protection, not real security — anyone who views this page's source
-  // can read the credentials below. Do not rely on this alone to protect
-  // sensitive member data; pair it with a real backend/auth if that matters
-  // for your deployment.
-  const SUPER_ADMIN = {
-    name: 'UbonIbangha',
-    password: 'Jesus2233@'
-  };
-
-  const adminConfirmModal = document.getElementById('adminConfirmModal');
-  const adminLoginModal = document.getElementById('adminLoginModal');
-  const adminLoginForm = document.getElementById('adminLoginForm');
-  const adminDeniedView = document.getElementById('adminDeniedView');
-  const adminNameInput = document.getElementById('adminNameInput');
-  const adminPasswordInput = document.getElementById('adminPasswordInput');
-  const adminLoginError = document.getElementById('adminLoginError');
-
-  let pendingAdminAction = null;
-
-  function openModal(modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-
-  function closeModal(modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-
-  function resetLoginModalState() {
-    adminNameInput.value = '';
-    adminPasswordInput.value = '';
-    adminLoginError.classList.add('hidden');
-    adminLoginForm.classList.remove('hidden');
-    adminDeniedView.classList.add('hidden');
-  }
-
-  // Call this instead of running a restricted action directly.
-  function requestAdminAction(actionFn) {
-    pendingAdminAction = actionFn;
-    openModal(adminConfirmModal);
-  }
-
-  document.getElementById('adminConfirmYes').addEventListener('click', () => {
-    closeModal(adminConfirmModal);
-    resetLoginModalState();
-    openModal(adminLoginModal);
-    feather.replace();
-    adminNameInput.focus();
-  });
-
-  document.getElementById('adminConfirmNo').addEventListener('click', () => {
-    closeModal(adminConfirmModal);
-    pendingAdminAction = null;
-  });
-
-  document.getElementById('adminLoginSubmit').addEventListener('click', () => {
-    const enteredName = adminNameInput.value.trim();
-    const enteredPassword = adminPasswordInput.value;
-
-    if (enteredName === SUPER_ADMIN.name && enteredPassword === SUPER_ADMIN.password) {
-      closeModal(adminLoginModal);
-      const action = pendingAdminAction;
-      pendingAdminAction = null;
-      resetLoginModalState();
-      if (action) action();
-    } else {
-      adminLoginForm.classList.add('hidden');
-      adminDeniedView.classList.remove('hidden');
-      feather.replace();
-    }
-  });
-
-  document.getElementById('adminLoginCancel').addEventListener('click', () => {
-    closeModal(adminLoginModal);
-    pendingAdminAction = null;
-    resetLoginModalState();
-  });
-
-  document.getElementById('adminReturnHomeBtn').addEventListener('click', () => {
-    closeModal(adminLoginModal);
-    pendingAdminAction = null;
-    resetLoginModalState();
-    showView('register');
-  });
 
   // ============================= Shared state & storage =============================
   const REGISTRATIONS_KEY = 'gwgmRegistrations';
@@ -604,39 +450,35 @@
   refreshRegistrationCount();
 
   document.getElementById('downloadExcelBtnReg').addEventListener('click', () => {
-    requestAdminAction(() => {
-      exportRegistrationsToExcel(
-        () => alert('No registrations recorded yet on this device.'),
-        null
-      );
-    });
+    exportRegistrationsToExcel(
+      () => alert('No registrations recorded yet on this device.'),
+      null
+    );
   });
 
   document.getElementById('resetDataBtn').addEventListener('click', () => {
-    requestAdminAction(() => {
-      const count = getRegistrations().length;
-      const confirmed = confirm(
-        count
-          ? `This will permanently delete all ${count} registration${count === 1 ? '' : 's'} and the current ID card stored on this device. This can't be undone. Continue?`
-          : 'This will clear any stored membership data on this device and start fresh. Continue?'
-      );
-      if (!confirmed) return;
+    const count = getRegistrations().length;
+    const confirmed = confirm(
+      count
+        ? `This will permanently delete all ${count} registration${count === 1 ? '' : 's'} and the current ID card stored on this device. This can't be undone. Continue?`
+        : 'This will clear any stored membership data on this device and start fresh. Continue?'
+    );
+    if (!confirmed) return;
 
-      localStorage.removeItem(REGISTRATIONS_KEY);
-      localStorage.removeItem('memberData');
+    localStorage.removeItem(REGISTRATIONS_KEY);
+    localStorage.removeItem('memberData');
 
-      // Reset the visible form back to defaults.
-      form.reset();
-      photoDataUrl = '';
-      photoPreview.src = '';
-      photoPreview.classList.add('hidden');
-      photoPlaceholder.classList.remove('hidden');
-      issueDateField.value = new Date().toISOString().split('T')[0];
-      membershipIdField.textContent = generateMembershipId();
-      refreshRegistrationCount();
+    // Reset the visible form back to defaults.
+    form.reset();
+    photoDataUrl = '';
+    photoPreview.src = '';
+    photoPreview.classList.add('hidden');
+    photoPlaceholder.classList.remove('hidden');
+    issueDateField.value = new Date().toISOString().split('T')[0];
+    membershipIdField.textContent = generateMembershipId();
+    refreshRegistrationCount();
 
-      alert('All data has been cleared. Starting fresh — membership IDs will begin again from GWGM-' + new Date().getFullYear() + '-0001.');
-    });
+    alert('All data has been cleared. Starting fresh — membership IDs will begin again from GWGM-' + new Date().getFullYear() + '-0001.');
   });
 
   document.getElementById('viewExistingBtn').addEventListener('click', () => showView('card'));
