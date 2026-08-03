@@ -346,8 +346,8 @@
   //   created_at (timestamptz, default now())
   // Enable Row Level Security and add policies appropriate for your app.
   // Paste your project URL and anon (public) key below.
-  const SUPABASE_URL = 'SUPABASE_URL';
-  const SUPABASE_ANON_KEY = 'SUPABASE_ANON_KEY';
+  const SUPABASE_URL = '__SUPABASE_URL__';
+  const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
 
   const supabaseClient =
     (window.supabase && SUPABASE_URL && !SUPABASE_URL.includes('YOUR_PROJECT_REF'))
