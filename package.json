@@ -2,6 +2,6 @@
   "name": "gwgm-membership",
   "private": true,
   "scripts": {
-    "build": "node inject-env.js && cp index.html ./public/index.html"
+    "build": "node inject-env.js"
   }
 }
