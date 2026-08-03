@@ -1,0 +1,7 @@
+{
+  "name": "gwgm-membership",
+  "private": true,
+  "scripts": {
+    "build": "node inject-env.js"
+  }
+}
